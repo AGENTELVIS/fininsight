@@ -6,3 +6,15 @@ export const SignupValidation = z.object({
     email: z.string().email({message: 'Invalid email'}),
     password: z.string().min(8, {message:'Password must be 8 letters'})
   })
+
+export const SigninValidation = z.object({
+    email: z.string().email({message: 'Invalid email'}),
+    password: z.string().min(8, {message:'Password must be 8 letters'})
+  })
+
+export const CardValidation = z.object({
+    amount: z.coerce.number().positive(),
+    category: z.string(),
+    note:  z.string().max(2200),
+    date: z.coerce.date(),
+})
