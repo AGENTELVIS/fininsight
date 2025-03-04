@@ -8,13 +8,11 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "../ui/textarea"
 import DatePicker from "../shared/DatePicker"
-import { Calendar } from "../ui/calendar"
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu"
 import CategoryDropdown from "./CategoryDropdown"
 import Toggle from "../shared/Toggle"
 import { CardValidation } from "@/lib/validation"
@@ -22,15 +20,14 @@ import { Models } from "appwrite"
 import { useCreateTransaction } from "@/lib/react-query/queriesAndMutations"
 import { useUserContext } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 type CardFormProps = {
   transaction?:Models.Document;
 }
 
 const CardForm = ({ transaction } : CardFormProps) => {
-
-  const { mutateAsync: createTransaction, isLoading: isLoadingCreate } = useCreateTransaction();
+  const {mutateAsync: createTransaction, isLoading: isLoadingCreate } = useCreateTransaction();
   const { user } = useUserContext();
   const {toast} = useToast();
   const  navigate  = useNavigate();
@@ -67,13 +64,16 @@ const CardForm = ({ transaction } : CardFormProps) => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
       
         <FormField
+          
           control={form.control}
           name="amount"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Amount</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="" {...field}/>
+                <Input required={true} type="number" placeholder="" {...field}
+                className=""
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,7 +85,8 @@ const CardForm = ({ transaction } : CardFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <CategoryDropdown value={field.value} onChange={field.onChange}/>
+              <CategoryDropdown value={field.value} onChange={field.onChange}/>
+                
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -111,16 +112,24 @@ const CardForm = ({ transaction } : CardFormProps) => {
             <FormItem>
               <FormLabel></FormLabel>
               <FormControl>
-              <Input type="datetime-local"
-              value={field.value ? new Date(field.value).toISOString().slice(0, 16) : ""}
-              onChange={(e) => field.onChange(new Date(e.target.value).toISOString())}
-              />
+              <DatePicker value={field.value} onChange={field.onChange}/>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
+        <p className="text-xs text-slate-500">*By default todays date will be selected</p>
+        <Button type="button" onClick={() => {
+          form.reset({
+            amount: 0,
+            category: "",
+            note: "",
+            date: new Date(),
+          });
+        }}
+        >
+            Cancel
+        </Button>
         <Button type="submit">Submit</Button>
       </form>
     </Form>

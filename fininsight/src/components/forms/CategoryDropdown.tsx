@@ -47,6 +47,10 @@ type Status = {
       value: "bills",
       label: "Bills",
     },
+    {
+      value: "other",
+      label: "Other",
+    },
 ]
 
 const CategoryDropdown = ({ value, onChange} : CategoryDropdownProps) => {
@@ -55,13 +59,20 @@ const CategoryDropdown = ({ value, onChange} : CategoryDropdownProps) => {
     const [selectedStatus, setSelectedStatus] = React.useState<Status | null>(
     null )
 
+    React.useEffect(() => {
+      if (value === "") {
+        setSelectedStatus(null);
+      } else {
+        setSelectedStatus(statuses.find((status) => status.value === value) || null);
+      }
+    }, [value]);
+
     return(
         <div className="flex items-center space-x-4">
-      <p className="text-sm text-muted-foreground">Category</p>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-[150px] justify-start">
-            {selectedStatus ? <>{selectedStatus.label}</> : <>other</>}
+          <Button variant="outline" className="w-full justify-center">
+            {selectedStatus ? <>{selectedStatus.label}</> : <>select category</>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0" side="right" align="start">

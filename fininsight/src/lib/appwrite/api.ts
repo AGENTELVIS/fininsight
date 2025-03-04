@@ -119,7 +119,7 @@ export async function createTransaction(transaction : INewData){
         amount: transaction.amount,
         category: transaction.category,
         note: transaction.note,
-        date: transaction.date,
+        date: transaction.date.toLocaleDateString(),
       }
     );
     
@@ -129,18 +129,18 @@ export async function createTransaction(transaction : INewData){
   }
 }
 
-/* export async function getRecentPosts() {
+ export async function getRecentTransactions() {
   try {
-    const posts = await databases.listDocuments(
+    const transactions = await databases.listDocuments(
       appwriteConfig.databaseId,
-      appwriteConfig.postCollectionId,
+      appwriteConfig.transactionsCollectionId,
       [Query.orderDesc("$createdAt"), Query.limit(20)]
     );
 
-    if (!posts) throw Error;
+    if (!transactions) throw Error;
 
-    return posts;
+    return transactions;
   } catch (error) {
     console.log(error);
   }
-} */
+} 
