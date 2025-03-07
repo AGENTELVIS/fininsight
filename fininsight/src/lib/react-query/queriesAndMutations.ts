@@ -1,4 +1,4 @@
-import { createTransaction, createUserAccount, getRecentTransactions, signInAccount, signOutAccount } from '../appwrite/api'
+import { createTransaction, createUserAccount, getRecentTransactions, getUserTransactions, signInAccount, signOutAccount } from '../appwrite/api'
 import { INewData, INewUser } from '@/types'
 import {
     useQuery,
@@ -43,6 +43,14 @@ export const useCreateTransaction = () => {
     });
 };
 
+export const useGetUserTransactions = (userId?: string) => {
+    return useQuery({
+      queryKey: [Query_Keys.GET_USER_TRANSACTIONS, userId],
+      queryFn: () => getUserTransactions(userId),
+      enabled: !!userId,
+    });
+  };
+  
 export const useGetRecentTransactions = () => {
     return useQuery({
         queryKey: [Query_Keys.GET_RECENT_TRANSACTIONS],

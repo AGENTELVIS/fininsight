@@ -14,13 +14,13 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "../ui/textarea"
 import DatePicker from "../shared/DatePicker"
 import CategoryDropdown from "./CategoryDropdown"
-import Toggle from "../shared/Toggle"
 import { CardValidation } from "@/lib/validation"
 import { Models } from "appwrite"
 import { useCreateTransaction } from "@/lib/react-query/queriesAndMutations"
 import { useUserContext } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
 import { Link, useNavigate } from "react-router-dom"
+import TypeToggle from "../shared/TypeToggle"
 
 type CardFormProps = {
   transaction?:Models.Document;
@@ -36,19 +36,24 @@ const CardForm = ({ transaction } : CardFormProps) => {
   const form = useForm<z.infer<typeof CardValidation>>({
     resolver: zodResolver(CardValidation),
     defaultValues: {
-      amount: transaction?.amount,
+      amount: transaction? transaction?.amount : 0,
       category: transaction ? transaction?.category : "",
       note: transaction ? transaction?.note : "",
       date: transaction?.date ? new Date(transaction.date) : new Date(),
+      type: transaction?.type || "expense",
     },
   })
  
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof CardValidation>) {
+    console.log("Submitting Values:", values);
+
     const newTransaction = await createTransaction({
       ...values,
       userId: user.id,
     })
+
+    console.log("trasaction created",newTransaction)
 
     if(!newTransaction){
       toast({
@@ -62,7 +67,21 @@ const CardForm = ({ transaction } : CardFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-      
+
+      <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Transaction Type</FormLabel>
+              <FormControl>
+                <TypeToggle onChange={(value) => field.onChange(value)} value={field.value as "income" | "expense"}/>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           
           control={form.control}
@@ -85,8 +104,11 @@ const CardForm = ({ transaction } : CardFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-              <CategoryDropdown value={field.value} onChange={field.onChange}/>
-                
+              <CategoryDropdown 
+              value={field.value} 
+              onChange={field.onChange}
+              
+              />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,6 +147,7 @@ const CardForm = ({ transaction } : CardFormProps) => {
             category: "",
             note: "",
             date: new Date(),
+            type: "expense"
           });
         }}
         >

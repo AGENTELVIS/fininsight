@@ -1,7 +1,8 @@
 import CardForm from "@/components/forms/CardForm"
 import Loader from "@/components/shared/Loader";
 import TransactionInfo from "@/components/shared/TransactionInfo";
-import { useGetRecentTransactions } from "@/lib/react-query/queriesAndMutations";
+import { useUserContext } from "@/context/AuthContext";
+import { useGetRecentTransactions, useGetUserTransactions } from "@/lib/react-query/queriesAndMutations";
 import { Models } from "appwrite";
 
 type TransactionInfoProps ={
@@ -9,11 +10,12 @@ type TransactionInfoProps ={
 };
 
 const CreateTransactions = ({transaction}: TransactionInfoProps) => {
-  const { data: transactions, isLoading: isTransactionLoading, isError: isErrorTransactions } = useGetRecentTransactions();
+  const { user } = useUserContext();
+  const { data: transactions, isLoading: isTransactionLoading, isError: isErrorTransactions } = useGetUserTransactions(user?.id);
 
   return (
     <div className='flex flex-1'>
-      <div className='flex flex-col flex-1 items-center gap-10 overflow-scroll py-10 px-5 md:px-8 lg:p-14'>
+      <div className='flex flex-col flex-1 items-center gap-10 overflow-scroll py-10 px-5 md:px-8 lg:p-14 w-1/2'>
         <div className="max-w-5xl flex items-start gap-3 justify-start w-full">
           <img 
             src="/assets/loader.svg"

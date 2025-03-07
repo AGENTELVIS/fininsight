@@ -110,6 +110,7 @@ export async function signOutAccount(){
 
 export async function createTransaction(transaction : INewData){
   try {
+    const formattedDate = new Date(transaction.date).toISOString()
     const newTransaction = databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
@@ -119,7 +120,8 @@ export async function createTransaction(transaction : INewData){
         amount: transaction.amount,
         category: transaction.category,
         note: transaction.note,
-        date: transaction.date.toLocaleDateString(),
+        date: formattedDate,
+        type: transaction.type,
       }
     );
     
@@ -129,7 +131,25 @@ export async function createTransaction(transaction : INewData){
   }
 }
 
- export async function getRecentTransactions() {
+export async function getUserTransactions(userId?: string) {
+  if (!userId) return;
+
+  try {
+    const userTransactions = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.transactionsCollectionId,
+      [Query.equal("creator", userId), Query.orderDesc("$createdAt")]
+    );
+
+    if (!userTransactions) throw Error;
+
+    return userTransactions;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getRecentTransactions() {
   try {
     const transactions = await databases.listDocuments(
       appwriteConfig.databaseId,

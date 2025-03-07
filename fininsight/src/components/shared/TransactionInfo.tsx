@@ -17,7 +17,11 @@ const TransactionInfo = ({ transaction }: TransactionInfoProps) => {
         <p className="font-medium">{transaction.category}</p>
         <p className="text-lg">₹{transaction.amount}</p>
       </div>
-      <p className="text-gray-400 text-sm mt-1 text-end">{formatDate(transaction.date)}</p>
+      <div className="flex justify-between">
+        <p className="text-gray-400 text-sm mt-1">{transaction.note} {transaction.type}</p>
+        <p className="text-gray-400 text-sm mt-1">{formatDate(transaction.date)}</p>
+
+      </div>
     </div>
   );
 };

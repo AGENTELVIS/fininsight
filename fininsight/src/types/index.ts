@@ -35,4 +35,5 @@ export type INewData = {
   category: string;
   note?: string;
   date: Date;
+  type :string;
 };
