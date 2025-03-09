@@ -1,5 +1,5 @@
-import { createTransaction, createUserAccount, getRecentTransactions, getUserTransactions, signInAccount, signOutAccount } from '../appwrite/api'
-import { INewData, INewUser } from '@/types'
+import { createAccount, createTransaction, createUserAccount, getRecentTransactions, getUserAccounts, getUserTransactions, signInAccount, signOutAccount } from '../appwrite/api'
+import { INewAccount, INewData, INewUser } from '@/types'
 import {
     useQuery,
     useMutation,
@@ -7,6 +7,7 @@ import {
     useInfiniteQuery
 } from '@tanstack/react-query'
 import { Query_Keys } from './queryKeys'
+import { databases } from '../appwrite/config'
 
 
 export const useCreateUserAccount = () =>{
@@ -57,5 +58,29 @@ export const useGetRecentTransactions = () => {
         queryFn: getRecentTransactions,
     })
 }
+
+ export const useCreateAccount = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (account : INewAccount) => createAccount(account),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [Query_Keys.GET_USER_ACCOUNTS]
+            }); 
+        },
+    });
+};
+
+export const useGetUserAccounts = (userId?: string) => {
+    return useQuery({
+      queryKey: [Query_Keys.GET_USER_ACCOUNTS, userId],
+      queryFn: () => getUserAccounts(userId),
+      enabled: !!userId,
+    });
+}; 
+
+
+
 
 

@@ -36,4 +36,11 @@ export type INewData = {
   note?: string;
   date: Date;
   type :string;
+  account: string;
 };
+
+export type INewAccount = {
+  userId: string;
+  name: string;
+  amount: number;
+}

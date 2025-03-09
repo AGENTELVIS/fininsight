@@ -1,6 +1,6 @@
 import { ID, Query } from "appwrite";
 
-import { INewUser, INewData } from "@/types";
+import { INewUser, INewData, INewAccount } from "@/types";
 import { avatars,account,appwriteConfig,databases } from "./config";
 
 export async function createUserAccount(user: INewUser) {
@@ -111,6 +111,7 @@ export async function signOutAccount(){
 export async function createTransaction(transaction : INewData){
   try {
     const formattedDate = new Date(transaction.date).toISOString()
+
     const newTransaction = databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
@@ -122,14 +123,17 @@ export async function createTransaction(transaction : INewData){
         note: transaction.note,
         date: formattedDate,
         type: transaction.type,
+        account: transaction.account,
       }
     );
-    
+
     return newTransaction;
   } catch (error) {
     console.log(error);
   }
 }
+
+
 
 export async function getUserTransactions(userId?: string) {
   if (!userId) return;
@@ -147,7 +151,7 @@ export async function getUserTransactions(userId?: string) {
   } catch (error) {
     console.log(error);
   }
-}
+} 
 
 export async function getRecentTransactions() {
   try {
@@ -164,3 +168,41 @@ export async function getRecentTransactions() {
     console.log(error);
   }
 } 
+
+export async function createAccount(account: INewAccount){
+  try {
+    const newAccount = databases.createDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.accountsCollectionId,
+      ID.unique(),
+    {
+      creator:account.userId,
+      name: account.name,
+      amount: account.amount
+    });
+
+    return newAccount;
+  } catch (error) {
+    console.log(error)
+  }
+} 
+
+export async function getUserAccounts(userId?: string) {
+  if (!userId) return {documents: []};
+
+  try {
+    const userAccounts = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.accountsCollectionId,
+      [Query.equal("creator", userId)]
+    );
+
+    if (!userAccounts) throw Error;
+
+    return userAccounts;
+  } catch (error) {
+    console.log(error);
+    return { documents: [] };
+  }
+} 
+

@@ -13,9 +13,15 @@ export const SigninValidation = z.object({
   })
 
 export const CardValidation = z.object({
-    amount: z.coerce.number().positive().min(1),
+    amount: z.coerce.number().positive().min(1).max(9999999),
     category: z.string().min(1,"Please select a category"),
     note:  z.string().max(2200),
     date: z.coerce.date(),
     type: z.string(),
+    account: z.string().min(1),
+})
+
+export const AccountValidation = z.object({
+    name: z.string().min(1,"Name is required"),
+    amount: z.coerce.number().positive().min(1).max(9999999),
 })

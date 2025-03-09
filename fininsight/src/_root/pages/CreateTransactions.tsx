@@ -1,6 +1,7 @@
 import CardForm from "@/components/forms/CardForm"
 import Loader from "@/components/shared/Loader";
 import TransactionInfo from "@/components/shared/TransactionInfo";
+import { Card } from "@/components/ui/card";
 import { useUserContext } from "@/context/AuthContext";
 import { useGetRecentTransactions, useGetUserTransactions } from "@/lib/react-query/queriesAndMutations";
 import { Models } from "appwrite";
@@ -26,10 +27,14 @@ const CreateTransactions = ({transaction}: TransactionInfoProps) => {
           />
           <h2 className="h3 font-bold md:h2 text-left w-full">Transactions</h2>
         </div>
+        <Card className="p-10">
+          <CardForm transaction={transaction}/>
+        </Card>
 
-        <CardForm />
         {isTransactionLoading && !transactions ? (
-          <Loader />
+          
+            <Loader />
+         
         ) : ( 
           <ul className="flex flex-wrap gap-4 justify-start">
             {transactions?.documents.map((transaction: Models.Document) => (

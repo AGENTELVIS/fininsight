@@ -16,11 +16,12 @@ import DatePicker from "../shared/DatePicker"
 import CategoryDropdown from "./CategoryDropdown"
 import { CardValidation } from "@/lib/validation"
 import { Models } from "appwrite"
-import { useCreateTransaction } from "@/lib/react-query/queriesAndMutations"
+import { useCreateTransaction, useGetUserAccounts } from "@/lib/react-query/queriesAndMutations"
 import { useUserContext } from "@/context/AuthContext"
 import { useToast } from "@/hooks/use-toast"
 import { Link, useNavigate } from "react-router-dom"
 import TypeToggle from "../shared/TypeToggle"
+import AccountDropdown from "../shared/AccountDropdown"
 
 type CardFormProps = {
   transaction?:Models.Document;
@@ -60,9 +61,9 @@ const CardForm = ({ transaction } : CardFormProps) => {
         title: 'Please try again',
       })
     }
+      navigate("/");
+  } 
 
-    navigate('/');
-  }
 
   return (
     <Form {...form}>
@@ -93,6 +94,21 @@ const CardForm = ({ transaction } : CardFormProps) => {
                 <Input required={true} type="number" placeholder="" {...field}
                 className=""
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="account"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+              <AccountDropdown 
+              value={field.value} 
+              onChange={field.onChange}
+              />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -7,6 +7,7 @@ export const appwriteConfig = {
     databaseId: import.meta.env.VITE_APPWRITE_DATABASE_ID,
     userCollectionId: import.meta.env.VITE_APPWRITE_USERS_ID,
     transactionsCollectionId: import.meta.env.VITE_APPWRITE_TRANSACTIONS_ID,
+    accountsCollectionId: import.meta.env.VITE_APPWRITE_ACCOUNTS_ID,
     remindersCollectionId: import.meta.env.VITE_APPWRITE_REMINDERS_ID,
 }
 
