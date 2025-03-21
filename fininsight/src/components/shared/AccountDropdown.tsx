@@ -1,7 +1,8 @@
-import { useGetUserAccounts } from "@/lib/react-query/queriesAndMutations";
+import { useGetUserAccounts } from "@/lib/react-query/queriesAndMutations.ts";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Models } from "appwrite";
-import { useUserContext } from "@/context/AuthContext";
+import { useUserContext } from "@/context/AuthContext.tsx";
+import { account } from "@/lib/appwrite/config";
 
 type AccountDropdownProps = {
   value?: string;

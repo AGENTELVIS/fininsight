@@ -1,18 +1,20 @@
-import CardForm from "@/components/forms/CardForm"
-import Loader from "@/components/shared/Loader";
-import TransactionInfo from "@/components/shared/TransactionInfo";
+import CardForm from "@/components/forms/CardForm.tsx"
+import Loader from "@/components/shared/Loader.tsx";
+import TransactionInfo from "@/components/shared/TransactionInfo.tsx";
 import { Card } from "@/components/ui/card";
-import { useUserContext } from "@/context/AuthContext";
-import { useGetRecentTransactions, useGetUserTransactions } from "@/lib/react-query/queriesAndMutations";
+import { useUserContext } from "@/context/AuthContext.tsx";
+import { useGetUserTransactions } from "@/lib/react-query/queriesAndMutations.ts";
 import { Models } from "appwrite";
 
-type TransactionInfoProps ={
-  transaction:Models.Document;
+type TransactionInfoProps = {
+  transaction: Models.Document;
 };
 
-const CreateTransactions = ({transaction}: TransactionInfoProps) => {
+const CreateTransactions = () => {
   const { user } = useUserContext();
-  const { data: transactions, isLoading: isTransactionLoading, isError: isErrorTransactions } = useGetUserTransactions(user?.id);
+  const { data: transactions, isLoading, isError } = useGetUserTransactions(user?.id);
+
+  console.log("Fetched Transactions:", transactions);
 
   return (
     <div className='flex flex-1'>
@@ -27,24 +29,28 @@ const CreateTransactions = ({transaction}: TransactionInfoProps) => {
           />
           <h2 className="h3 font-bold md:h2 text-left w-full">Transactions</h2>
         </div>
+
+        {/* Transaction Form */}
         <Card className="p-10">
-          <CardForm transaction={transaction}/>
+          <CardForm />
         </Card>
 
-        {isTransactionLoading && !transactions ? (
-          
-            <Loader />
-         
-        ) : ( 
+        {isLoading && <Loader />}
+
+        {!isLoading && !isError && transactions?.documents?.length > 0 ? (
           <ul className="flex flex-wrap gap-4 justify-start">
-            {transactions?.documents.map((transaction: Models.Document) => (
-              <TransactionInfo transaction={transaction} />
+            {transactions.documents.map((tx: Models.Document) => (
+              <TransactionInfo transaction={tx} key={tx.$id} />
             ))}
-          </ul> 
+          </ul>
+        ) : (
+          !isLoading && !isError && <p>No transactions found</p>
         )}
+
+        {isError && <p className="text-red-500">Error loading transactions.</p>}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreateTransactions
+export default CreateTransactions;

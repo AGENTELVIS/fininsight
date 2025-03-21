@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '../ui/button'
-import { useSignOutAccount } from '@/lib/react-query/queriesAndMutations'
-import { useUserContext } from '@/context/AuthContext'
-import { sidebarLinks } from '@/constants'
+import { useSignOutAccount } from '@/lib/react-query/queriesAndMutations.ts'
+import { useUserContext } from '@/context/AuthContext.tsx'
+import { sidebarLinks } from '@/constants/index.ts'
 import { INavLink } from '@/types'
 
 const LeftSidebar = () => {

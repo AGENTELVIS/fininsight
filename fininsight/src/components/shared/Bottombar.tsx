@@ -1,4 +1,4 @@
-import { bottombarLinks } from '@/constants';
+import { bottombarLinks } from '@/constants/index.ts';
 import { Link, useLocation } from 'react-router-dom';
 
 const Bottombar = () => {

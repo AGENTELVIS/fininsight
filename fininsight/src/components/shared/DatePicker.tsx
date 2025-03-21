@@ -9,21 +9,23 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import React from "react"
+import React, { forwardRef } from "react"
 
 type DatePickerProps = {
     value?: Date;
     onChange?: (date?: Date) => void;
+    minDate?:Date;
 };
   
 
-const DatePicker = ({ value, onChange }: DatePickerProps) => {
-
+const DatePicker = forwardRef<HTMLButtonElement, DatePickerProps>(
+    ({ value, onChange }:DatePickerProps, ref) => {
     return (
         <div>
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
+                    ref={ref}
                     variant={"outline"}
                     className={cn(
                         "w-full justify-start text-left font-normal",
@@ -47,5 +49,6 @@ const DatePicker = ({ value, onChange }: DatePickerProps) => {
     </div>
   )
 }
+);
 
 export default DatePicker

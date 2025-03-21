@@ -1,49 +1,50 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import {
     Drawer,
     DrawerClose,
     DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
     DrawerHeader,
     DrawerTitle,
-    DrawerTrigger,
-  } from "@/components/ui/drawer"
+    DrawerFooter,
+} from "@/components/ui/drawer";
 import {
     Form,
     FormControl,
     FormField,
     FormItem,
     FormLabel,
-  FormMessage,
-} from "@/components/ui/form"  
-import { Button } from "../ui/button"
-import { Plus } from "lucide-react"
-import { AccountValidation } from "@/lib/validation"
-import { Input } from "../ui/input"
-import { Label } from "../ui/label"
-import { useUserContext } from "@/context/AuthContext"
-import { createAccount } from "@/lib/appwrite/api"
-import { toast, useToast } from "@/hooks/use-toast"
-import { useNavigate } from "react-router-dom"
-import { useCreateAccount } from "@/lib/react-query/queriesAndMutations"
-import { Models } from "appwrite"
-import { useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
+    FormMessage,
+} from "@/components/ui/form";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { useUserContext } from "@/context/AuthContext.tsx";
+import { createAccount } from "@/lib/appwrite/api.ts";
+import { toast, useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import { useCreateAccount, useDeleteAccount, useUpdateAccount } from "@/lib/react-query/queriesAndMutations.ts";
+import { Models } from "appwrite";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Query_Keys } from "@/lib/react-query/queryKeys";
+import { AccountValidation } from "@/lib/validation/index.ts";
+import DeleteDialog from "./DeleteDialog.tsx";
 
 type AccountDrawerProps = {
-    account?:Models.Document;
-}
+    account?: Models.Document;
+    isOpen: boolean;
+    setIsOpen: (open: boolean) => void;
+};
 
-const AccountDrawer = ({account}:AccountDrawerProps) => {
-    const {mutateAsync: createNewAccount } = useCreateAccount()
-    const {toast} = useToast();
+const AccountDrawer = ({ account, isOpen, setIsOpen }: AccountDrawerProps) => {
+    const { mutateAsync: createNewAccount } = useCreateAccount();
+    const { mutateAsync: updateExistingAccount  } = useUpdateAccount();
+    const { mutateAsync: deleteAccount } = useDeleteAccount();
+    const { toast } = useToast();
     const { user } = useUserContext();
-    const  navigate  = useNavigate();
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const [open, setOpen] = useState(false);
 
     const form = useForm<z.infer<typeof AccountValidation>>({
         resolver: zodResolver(AccountValidation),
@@ -53,39 +54,54 @@ const AccountDrawer = ({account}:AccountDrawerProps) => {
         },
     });
 
+    useEffect(() => {
+        form.reset({
+            name: account?.name || "",
+            amount: account?.amount || 0,
+        });
+    }, [account, isOpen]);
+
     async function onSubmit(values: z.infer<typeof AccountValidation>) {
         console.log("Submitting Values:", values);
-
-        const newAccount = await createAccount({
-            ...values,
-            userId:user.id,
-        });
-
-        console.log("Account created",newAccount)
-
-        if(!newAccount){
-        toast({
-            title: 'Please try again',
-        })
-        }
-
-        setOpen(false);
-
-        // Refresh accounts list immediately
-        queryClient.invalidateQueries(["GET_ACCOUNTS"]);
-
-        navigate('/');
-    }
-
-  return (
     
-        <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger>
-                <Button> Create Account <Plus/></Button>
-            </DrawerTrigger>
+        let response;
+        if (account) {
+            // If an account exists, update it
+            response = await updateExistingAccount({
+                accountId: account.$id,
+                updatedData: values,
+            });
+        } else {
+            // Otherwise, create a new account
+            response = await createNewAccount({
+                ...values,
+                userId: user.id,
+            });
+        }
+    
+        if (!response) {
+            toast({ title: "Please try again" });
+        } else {
+            queryClient.invalidateQueries([Query_Keys.GET_USER_ACCOUNTS]);
+            setIsOpen(false);
+            navigate("/");
+        }
+    }
+    
+    async function handleDelete() {
+        if (account) {
+            await deleteAccount(account.$id);
+            queryClient.invalidateQueries([Query_Keys.GET_USER_ACCOUNTS]);
+            setIsOpen(false);
+        }
+    }
+    
+
+    return (
+        <Drawer open={isOpen} onOpenChange={setIsOpen}>
             <DrawerContent>
                 <DrawerHeader>
-                <DrawerTitle>Create Account</DrawerTitle>
+                    <DrawerTitle>{account ? "Edit Account" : "Create Account"}</DrawerTitle>
                 </DrawerHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
@@ -93,43 +109,44 @@ const AccountDrawer = ({account}:AccountDrawerProps) => {
                             control={form.control}
                             name="name"
                             render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                <Input {...field}/>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
+                                <FormItem>
+                                    <FormLabel>Name</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
                         />
                         <FormField
                             control={form.control}
                             name="amount"
                             render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Amount</FormLabel>
-                                <FormControl>
-                                <Input type="number" {...field}/>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
+                                <FormItem>
+                                    <FormLabel>Amount</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
                         />
-                        <Button type="submit">Submit</Button>
+                        <Button type="submit">{account ? "Save Changes" : "Create Account"}</Button>
                     </form>
                 </Form>
-                <DrawerFooter>
-                <DrawerClose>
-                    <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-                </DrawerClose>
+                <DrawerFooter className="flex justify-between">
+                    <DrawerClose>
+                        <Button variant="outline" onClick={() => setIsOpen(false)}>
+                            Cancel
+                        </Button>
+                    </DrawerClose>
+                    {account && (
+                        <DeleteDialog accountId={account.$id} setIsOpen={setIsOpen}/> // Move DeleteDialog here
+                    )}
                 </DrawerFooter>
             </DrawerContent>
-          
         </Drawer>
-        
+    );
+};
 
-  )
-}
-
-
-export default AccountDrawer
+export default AccountDrawer;

@@ -1,13 +1,26 @@
-import { createAccount, createTransaction, createUserAccount, getRecentTransactions, getUserAccounts, getUserTransactions, signInAccount, signOutAccount } from '../appwrite/api'
-import { INewAccount, INewData, INewUser } from '@/types'
-import {
-    useQuery,
-    useMutation,
-    useQueryClient,
-    useInfiniteQuery
-} from '@tanstack/react-query'
-import { Query_Keys } from './queryKeys'
-import { databases } from '../appwrite/config'
+import { INewAccount, INewData, INewUser } from '@/types';
+import { 
+    createAccount, 
+    createTransaction, 
+    createUserAccount, 
+    deleteAccount, 
+    getRecentTransactions, 
+    getUserAccounts, 
+    getUserTransactions, 
+    signInAccount, 
+    signOutAccount, 
+    updateAccount, 
+    updateAccountBalance 
+} from '../appwrite/api';
+
+import { 
+    useQuery, 
+    useMutation, 
+    useQueryClient,  
+} from '@tanstack/react-query';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Query_Keys } from './queryKeys';
 
 
 export const useCreateUserAccount = () =>{
@@ -78,9 +91,59 @@ export const useGetUserAccounts = (userId?: string) => {
       queryFn: () => getUserAccounts(userId),
       enabled: !!userId,
     });
-}; 
+};
+
+type UpdateAccountBalanceParams = {
+    accountId: string;
+    amount: number;
+    type: string;
+};
+
+export const useUpdateAccountBalance = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation(
+        async ({ accountId, amount, type }: UpdateAccountBalanceParams) => 
+            updateAccountBalance(accountId, amount, type),
+        {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: [Query_Keys.GET_USER_ACCOUNTS] });
+                queryClient.invalidateQueries({ queryKey: [Query_Keys.GET_USER_TRANSACTIONS] });
+            },
+        }
+    );
+};
+
+// ✅ Update Account
+type UpdateAccountParams = {
+    accountId: string;
+    updatedData: {
+        name: string;
+        amount: number;
+    };
+};
+
+export const useUpdateAccount = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ accountId, updatedData }: UpdateAccountParams) => 
+            updateAccount(accountId, updatedData),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [Query_Keys.GET_USER_ACCOUNTS] });
+        },
+    });
+};
 
 
+// ✅ Delete Account
+export const useDeleteAccount = () => {
+    const queryClient = useQueryClient();
 
-
-
+    return useMutation<void, Error, string>({
+        mutationFn: deleteAccount,
+        onSuccess: () => {
+            queryClient.invalidateQueries([Query_Keys.GET_USER_ACCOUNTS]);
+        },
+    });
+};

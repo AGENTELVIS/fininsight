@@ -6,4 +6,4 @@ const  updateAccount = () => {
   )
 }
 
-export default 
+export default updateAccount

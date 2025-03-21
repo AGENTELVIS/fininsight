@@ -4,12 +4,12 @@ import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useForm } from "react-hook-form"
-import { SigninValidation } from '@/lib/validation'
-import Loader from '@/components/shared/Loader';
+import { SigninValidation } from '@/lib/validation/index.ts'
+import Loader from '@/components/shared/Loader.tsx';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast"
-import { useSignInAccount } from '@/lib/react-query/queriesAndMutations';
-import { useUserContext } from '@/context/AuthContext';
+import { useSignInAccount } from '@/lib/react-query/queriesAndMutations.ts';
+import { useUserContext } from '@/context/AuthContext.tsx';
 
 
 

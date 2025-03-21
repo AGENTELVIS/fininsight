@@ -37,6 +37,9 @@ export type INewData = {
   date: Date;
   type :string;
   account: string;
+  isRecurring:Boolean;
+  interval?:string;
+  enddate?:Date;
 };
 
 export type INewAccount = {

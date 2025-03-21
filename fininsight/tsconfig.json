@@ -11,7 +11,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["src/*"]
     }
-  }
+  },
+  "include": ["src", "src/types"], // ✅ Include 'function' folder
+  "exclude": ["node_modules", "dist"]
 }

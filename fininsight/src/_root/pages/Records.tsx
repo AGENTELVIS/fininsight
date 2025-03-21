@@ -1,8 +1,10 @@
 import React from 'react'
+import RecordDetails from './RecordDetails'
+import RecordsTable from '@/components/shared/RecordsTable'
 
 const Records = () => {
   return (
-    <div>Records</div>
+    <div><RecordsTable/></div>
   )
 }
 

@@ -7,8 +7,12 @@ type AccountInfoProps = {
 
 const AccountInfoCard = ({account}:AccountInfoProps) => {
   return (
-    <div>
-        <p>{account.name}{account.amount}</p>
+    <div className='flex justify-between'>
+        <div className='justify-between flex'>
+          <p className=''>{account.name}</p>
+          <p className=''>{account.amount}</p>
+        </div>
+        <div className='border-none outline-none'></div>
     </div>
   )
 }

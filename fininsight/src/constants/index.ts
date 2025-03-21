@@ -12,8 +12,8 @@ export const sidebarLinks = [
     },
     {
       imgURL: "/assets/icons/bookmark.svg",
-      route: "/create-reminders",
-      label: "Reminders",
+      route: "/upload-transactions",
+      label: "Transactions 2",
     },
     {
       imgURL: "/assets/icons/bookmark.svg",

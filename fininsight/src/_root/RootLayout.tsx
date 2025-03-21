@@ -1,6 +1,6 @@
-import Topbar from '@/components/shared/Topbar'
-import LeftSidebar from '@/components/shared/LeftSidebar'
-import Bottombar from '@/components/shared/Bottombar'
+import Topbar from '@/components/shared/Topbar.tsx'
+import LeftSidebar from '@/components/shared/LeftSidebar.tsx'
+import Bottombar from '@/components/shared/Bottombar.tsx'
 import { Outlet } from 'react-router-dom'
 
 
