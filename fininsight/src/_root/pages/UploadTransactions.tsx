@@ -4,7 +4,7 @@ import {useDropzone} from "react-dropzone";
 
 const UploadTransactions = () => {
   return (
-    <div><PdfUploader/></div>
+    <div></div>
   )
 }
 

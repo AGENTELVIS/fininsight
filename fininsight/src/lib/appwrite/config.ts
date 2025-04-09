@@ -8,9 +8,11 @@ export const appwriteConfig = {
     transactionsCollectionId: '67b88c97001e561cd21d',
     accountsCollectionId: '67cd53bb002c7c44f8e1',
     remindersCollectionId: '67641e3d00275032f4fb',
+    budgetCollectionId:'67f53754003097c20d4a',
 }
 
 export const client = new Client();
+export const geminiAPIKey = import.meta.env.VITE_GEMINI_API_KEY;
 
 client.setProject(appwriteConfig.projectId);
 client.setEndpoint(appwriteConfig.url);

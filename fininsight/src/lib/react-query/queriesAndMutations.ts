@@ -1,16 +1,20 @@
-import { INewAccount, INewData, INewUser } from '@/types';
+import { INewAccount, INewBudget, INewData, INewUser } from '@/types';
 import { 
     createAccount, 
+    createBudget, 
     createTransaction, 
     createUserAccount, 
     deleteAccount, 
+    deleteTransaction, 
     getRecentTransactions, 
     getUserAccounts, 
+    getUserBudgets, 
     getUserTransactions, 
     signInAccount, 
     signOutAccount, 
     updateAccount, 
-    updateAccountBalance 
+    updateAccountBalance, 
+    updateTransaction
 } from '../appwrite/api';
 
 import { 
@@ -125,7 +129,7 @@ type UpdateAccountParams = {
 
 export const useUpdateAccount = () => {
     const queryClient = useQueryClient();
-
+    
     return useMutation({
         mutationFn: async ({ accountId, updatedData }: UpdateAccountParams) => 
             updateAccount(accountId, updatedData),
@@ -145,5 +149,50 @@ export const useDeleteAccount = () => {
         onSuccess: () => {
             queryClient.invalidateQueries([Query_Keys.GET_USER_ACCOUNTS]);
         },
+    });
+};
+
+export const useUpdateTransaction = () => {
+    const queryClient = useQueryClient();
+  
+    return useMutation({
+      mutationFn: async ({ transactionId, updatedData }: { transactionId: string; updatedData: any }) =>
+        updateTransaction(transactionId, updatedData),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: [Query_Keys.GET_USER_TRANSACTIONS] });
+      },
+    });
+    
+};
+  
+export const useDeleteTransaction = () => {
+    const queryClient = useQueryClient();
+  
+    return useMutation({
+      mutationFn: async (transactionId: string) => deleteTransaction(transactionId),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: [Query_Keys.GET_USER_TRANSACTIONS] });
+      },
+    });
+};
+  
+export const useCreateBudget = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (budget : INewBudget) => createBudget(budget),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: [Query_Keys.GET_USER_BUDGETS]
+            }); 
+        },
+    });
+};
+
+export const useGetUserBudgets = (userId?: string) => {
+    return useQuery({
+      queryKey: [Query_Keys.GET_USER_BUDGETS, userId],
+      queryFn: () => getUserBudgets(userId),
+      enabled: !!userId,
     });
 };

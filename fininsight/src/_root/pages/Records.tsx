@@ -4,7 +4,11 @@ import RecordsTable from '@/components/shared/RecordsTable'
 
 const Records = () => {
   return (
+    <>
+    <div className='overflow-auto w-full'>
     <div><RecordsTable/></div>
+    </div>
+    </>
   )
 }
 

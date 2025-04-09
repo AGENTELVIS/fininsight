@@ -1,5 +1,4 @@
 import * as React from "react"
- 
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -18,80 +17,75 @@ import {
 type CategoryDropdownProps = {
   value: string;
   onChange: (value: string) => void;
+  type: "income" | "expense";
 };
 
 type Status = {
-    value: string
-    label: string
+  value: string;
+  label: string;
+};
 
-  }
-   
-  const statuses: Status[] = [
-    {
-      value: "shopping",
-      label: "Shopping",
-    },
-    {
-      value: "food",
-      label: "Food",
-    },
-    {
-      value: "home",
-      label: "Home",
-    },
-    {
-      value: "entertainment",
-      label: "Entertainment",
-    },
-    {
-      value: "bills",
-      label: "Bills",
-    },
-    {
-      value: "other",
-      label: "Other",
-    },
-]
+const incomeCategories: Status[] = [
+  { value: "salary", label: "Salary" },
+  { value: "freelance", label: "Freelance" },
+  { value: "investment", label: "Investment" },
+  { value: "gift", label: "Gift" },
+  { value: "refund", label: "Refund" },
+  { value: "bonus", label: "Bonus" },
+  { value: "rental_income", label: "Rental Income" },
+];
 
-const CategoryDropdown = ({ value, onChange} : CategoryDropdownProps) => {
+const expenseCategories: Status[] = [
+  { value: "shopping", label: "Shopping" },
+  { value: "food", label: "Food" },
+  { value: "home", label: "Home" },
+  { value: "entertainment", label: "Entertainment" },
+  { value: "bills", label: "Bills" },
+  { value: "travel", label: "Travel" },
+  { value: "health", label: "Health" },
+  { value: "education", label: "Education" },
+  { value: "subscriptions", label: "Subscriptions" },
+  { value: "other", label: "Other" },
+];
 
-    const [open, setOpen] = React.useState(false)
-    const [selectedStatus, setSelectedStatus] = React.useState<Status | null>(
-    null )
+const CategoryDropdown = ({ value, onChange, type }: CategoryDropdownProps) => {
+  const [open, setOpen] = React.useState(false);
+  const [selectedStatus, setSelectedStatus] = React.useState<Status | null>(null);
 
-    React.useEffect(() => {
-      if (value === "") {
-        setSelectedStatus(null);
-      } else {
-        setSelectedStatus(statuses.find((status) => status.value === value) || null);
-      }
-    }, [value]);
+  const availableCategories = type === "income" ? incomeCategories : expenseCategories;
 
-    return(
-        <div className="flex items-center space-x-4">
+  React.useEffect(() => {
+    if (value === "") {
+      setSelectedStatus(null);
+    } else {
+      setSelectedStatus(availableCategories.find((status) => status.value === value) || null);
+    }
+  }, [value, type]);
+
+  return (
+    <div className="flex items-center space-x-4 w-full">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="w-full justify-center">
-            {selectedStatus ? <>{selectedStatus.label}</> : <>select category</>}
+            {selectedStatus ? selectedStatus.label : "Select category"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0" side="right" align="start">
+        <PopoverContent className="z-50 p-0">
           <Command>
-            <CommandInput placeholder="select category..." />
+            <CommandInput placeholder="Select category..." />
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup>
-                {statuses.map((status) => (
+                {availableCategories.map((status) => (
                   <CommandItem
                     key={status.value}
                     value={status.value}
                     onSelect={(value) => {
                       onChange(value);
                       setSelectedStatus(
-                        statuses.find((priority) => priority.value === value) ||
-                          null
-                      )
-                      setOpen(false)
+                        availableCategories.find((item) => item.value === value) || null
+                      );
+                      setOpen(false);
                     }}
                   >
                     {status.label}
@@ -103,7 +97,7 @@ const CategoryDropdown = ({ value, onChange} : CategoryDropdownProps) => {
         </PopoverContent>
       </Popover>
     </div>
-    )
-}
+  );
+};
 
 export default CategoryDropdown;

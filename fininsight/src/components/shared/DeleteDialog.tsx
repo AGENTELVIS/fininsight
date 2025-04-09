@@ -10,45 +10,42 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useDeleteAccount } from "@/lib/react-query/queriesAndMutations.ts";
-import { useQueryClient } from "@tanstack/react-query";
+import { Trash } from "lucide-react";
 
 type DeleteDialogProps = {
-    accountId: string;
-    setIsOpen: (open: boolean) => void; // Add setIsOpen prop
+  itemId: string;
+  onDelete: (id: string) => Promise<void>; // Function to handle delete logic
+  title?: string;
+  description?: string;
+  buttonText?: string;
 };
 
-const DeleteDialog = ({ accountId, setIsOpen }: DeleteDialogProps) => {
-    const { mutateAsync: deleteAccount } = useDeleteAccount();
-    const queryClient = useQueryClient();
+const DeleteDialog = ({ itemId, onDelete, title, description, buttonText }: DeleteDialogProps) => {
+  const handleDelete = async () => {
+    await onDelete(itemId);
+  };
 
-    const handleDelete = async () => {
-        await deleteAccount(accountId);
-        queryClient.invalidateQueries(); // Refresh data after deletion
-        setIsOpen(false); // Close the drawer
-    };
-
-    return (
-        <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <button className="bg-red-500 text-white px-4 py-2 rounded">
-                    Delete Account
-                </button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Deleting this account will also delete all its transactions.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>Confirm</AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    );
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <button className="bg-red-500 text-white px-4 py-2 rounded">
+          {buttonText || ""}
+        </button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title || "Are you sure?"}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {description || "This action cannot be undone."}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 };
 
 export default DeleteDialog;

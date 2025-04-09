@@ -8,12 +8,12 @@ export const sidebarLinks = [
     {
       imgURL: "/assets/icons/wallpaper.svg",
       route: "/create-transactions",
-      label: "Transactions",
+      label: "Budgets",
     },
     {
       imgURL: "/assets/icons/bookmark.svg",
       route: "/upload-transactions",
-      label: "Transactions 2",
+      label: "Transactions",
     },
     {
       imgURL: "/assets/icons/bookmark.svg",
@@ -35,7 +35,7 @@ export const bottombarLinks = [
     },
     {
       imgURL: "/assets/icons/bookmark.svg",
-      route: "/create-reminders",
+      route: "/upload-transactions",
       label: "Reminders",
     },
     {

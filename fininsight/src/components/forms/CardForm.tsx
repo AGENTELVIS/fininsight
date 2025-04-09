@@ -27,19 +27,23 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Switch } from "../ui/switch";
 import IntervalDropdown from "../shared/IntervalDropdown.tsx";
 import { useState } from "react";
+import { updateTransaction } from "@/lib/appwrite/api.ts";
 
 type CardFormProps = {
   transaction?: Models.Document;
+  onClose?: () => void;
 };
 
-const CardForm = ({ transaction }: CardFormProps) => {
+const CardForm = ({ transaction, onClose }: CardFormProps) => {
   const { mutateAsync: createTransaction, isLoading: isLoadingCreate } = useCreateTransaction();
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(transaction?.isRecurring || false);
   const [dateError, setDateError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useUserContext();
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof CardValidation>>({
@@ -62,30 +66,30 @@ const CardForm = ({ transaction }: CardFormProps) => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof CardValidation>) {
-    console.log("Form Errors Before Submit:", form.formState.errors);
+    if (Object.keys(form.formState.errors).length > 0) return;
 
-    if (Object.keys(form.formState.errors).length > 0) {
-      console.log("Validation failed", form.formState.errors);
-      return;
+    if (isSubmitting) return; // prevent double submit
+    setIsSubmitting(true);
+  
+    try {
+      if (transaction) {
+        await updateTransaction(transaction.$id, values);
+        toast({ title: "Transaction updated successfully!" });
+      } else {
+        await createTransaction({ ...values, userId: user.id });
+        toast({ title: "Transaction created successfully!" });
+      }
+  
+      queryClient.invalidateQueries([Query_Keys.GET_USER_TRANSACTIONS]);
+      navigate("/");
+    } catch (error) {
+      console.error("Submission Error:", error);
+      toast({ title: "Something went wrong!", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
     }
-    console.log("Submitting Values:", values);
-
-    const newTransaction = await createTransaction({
-      ...values,
-      userId: user.id,
-    });
-
-    console.log("Transaction created", newTransaction);
-
-    if (!newTransaction) {
-      toast({
-        title: "Please try again",
-      });
-    }
-
-    queryClient.invalidateQueries([Query_Keys.GET_USER_TRANSACTIONS]);
-    navigate("/");
   }
+  
 
   return (
     <Form {...form}>
@@ -137,7 +141,9 @@ const CardForm = ({ transaction }: CardFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <CategoryDropdown value={field.value} onChange={field.onChange} />
+                <CategoryDropdown value={field.value} onChange={field.onChange} 
+                type={form.watch("type") as "income" | "expense"} // ✅ Type-safe
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -173,25 +179,6 @@ const CardForm = ({ transaction }: CardFormProps) => {
 
         <p className="text-xs text-slate-500">*By default, today's date will be selected</p>
 
-        <FormField
-          control={form.control}
-          name="isRecurring"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Recurring transaction</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={isRecurring}
-                  onCheckedChange={(checked) => {
-                    setIsRecurring(checked);
-                    field.onChange(checked);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         {isRecurring && (
           <>
@@ -227,11 +214,39 @@ const CardForm = ({ transaction }: CardFormProps) => {
           </>
         )}
 
-        <Button type="button" onClick={() => form.reset()}>Cancel</Button>
-        <Button type="submit">Submit</Button>
+        <Button type="button" onClick={() => 
+        {
+          form.reset();
+          if (onClose)
+            {onClose();}
+          }}>
+          Cancel</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {transaction ? "Update" : "Submit"}
+          </Button>
       </form>
     </Form>
   );
 };
 
 export default CardForm;
+
+/*<FormField
+          control={form.control}
+          name="isRecurring"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Recurring transaction</FormLabel>
+              <FormControl>
+                <Switch
+                  checked={isRecurring}
+                  onCheckedChange={(checked) => {
+                    setIsRecurring(checked);
+                    field.onChange(checked);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />*/

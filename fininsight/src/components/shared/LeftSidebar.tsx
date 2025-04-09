@@ -1,70 +1,96 @@
-import { useEffect } from 'react'
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { Button } from '../ui/button'
-import { useSignOutAccount } from '@/lib/react-query/queriesAndMutations.ts'
-import { useUserContext } from '@/context/AuthContext.tsx'
-import { sidebarLinks } from '@/constants/index.ts'
-import { INavLink } from '@/types'
+import { useEffect } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Button } from '../ui/button';
+import { useSignOutAccount } from '@/lib/react-query/queriesAndMutations.ts';
+import { useUserContext } from '@/context/AuthContext.tsx';
+import { sidebarLinks } from '@/constants/index.ts';
+import { INavLink } from '@/types';
+import { Home, Wallet, ListChecks, FileText } from 'lucide-react';
 
 const LeftSidebar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user } = useUserContext();
-  const { mutate:signOut, isSuccess} = useSignOutAccount();
+  const { mutate: signOut, isSuccess } = useSignOutAccount();
 
   useEffect(() => {
     if (isSuccess) navigate(0);
   }, [isSuccess]);
 
+  const getIcon = (label: string) => {
+    switch (label) {
+      case 'Home':
+        return <Home className="w-6 h-6" />;
+      case 'Budgets':
+        return <Wallet className="w-6 h-6" />;
+      case 'Transactions':
+        return <ListChecks className="w-6 h-6" />;
+      case 'Records':
+        return <FileText className="w-6 h-6" />;
+      default:
+        return null; // Or a default icon
+    }
+  };
+  
   return (
-    <nav className='hidden md:flex px-6 py-10 flex-col justify-between min-w-[270px] bg-gray-800'>
-        <div className='flex flex-col gap-11'>
-        <Link to="/" className='flex gap-3 items-center'>
-                <img src='/assets/react.svg' alt='logo' width={50} height={36}/>
+    <nav className="hidden md:flex flex-col justify-between w-72 bg-slate-50 shadow-xl rounded-xl border-2 m-3">
+      <div className="flex flex-col gap-10 p-5">
+        {/* Logo */}
+        <Link to="/" className="flex items-center">
+          <img
+            src="default-monochrome.svg"
+            alt="logo"
+            className="w-[160px] transition-all duration-300"
+          />
         </Link>
 
-        <Link to={`/profile/${user.id}`} className='flex gap-3 items-center'>
-            <img 
-                src={user.imageUrl || "/assets/react.svg"}
-                alt='profile'
-                className='h-14 w-14 rounded-full'
-            />
-            <div className='flex flex-col'>
-                <p className='font-bold'>
-                    {user.name}
-                </p>
-            </div>
+        {/* User */}
+        <Link to={`/profile/${user.id}`} className="flex items-center gap-3">
+          <img
+            src={user.imageUrl || '/assets/react.svg'}
+            alt="profile"
+            className="h-12 w-12 rounded-full object-cover"
+          />
+          <p className="font-bold truncate">
+            {user.name}
+          </p>
         </Link>
 
-        <ul className='flex flex-col gap-6'>
-            {sidebarLinks.map((link: INavLink)=> {
-                const isActive = pathname == link.route;
-                
-                return (
-                    <li key={link.label} className={`group rounded-lg base-medium hover:bg-gray-500 transition ${isActive && 'bg-gray-500'}`}>
-                        <NavLink to={link.route} className='flex gap-4 items-center p-4'>
-                            <img 
-                                src={link.imgURL}
-                                alt={link.label}
-                                className={`group-hover:invert ${isActive && 'invert'}`}
-                            />
-                            {link.label}
-                        </NavLink>
-                    </li>
-                )
-            })}
+        {/* Links */}
+        <ul className="flex flex-col gap-3">
+          {sidebarLinks.map((link: INavLink) => {
+            const isActive = pathname === link.route;
+
+            return (
+              <li
+                key={link.label}
+                className={`group/item rounded-lg transition ${isActive ? 'bg-green-600' : ''}`}
+              >
+                <NavLink
+                  to={link.route}
+                  className="flex items-center gap-4 p-4"
+                >
+                  {/* Add icon here */}
+                  {getIcon(link.label)}
+                  <span>{link.label}</span>
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
-        </div>
+      </div>
 
-        <Button variant='ghost' 
-        className='shad-button_ghost' 
-        onClick={() => signOut()}>
-
-            <img src='vite.svg' alt-="logout" />
-            <p className='text-sm lg:text-sm'>Logout</p>
-        </Button> 
+      {/* Logout Button */}
+      <Button
+        variant="ghost"
+        className="flex gap-2 items-center text-red-500 p-5 m-4"
+        onClick={() => signOut()}
+      >
+        <img src="vite.svg" alt="logout" className="w-5 h-5" />
+        <p className="text-sm">Logout</p>
+      </Button>
     </nav>
-  )
-}
+  );
+};
 
-export default LeftSidebar
+export default LeftSidebar;

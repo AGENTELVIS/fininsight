@@ -47,3 +47,12 @@ export type INewAccount = {
   name: string;
   amount: number;
 }
+
+export type INewBudget = {
+  userID: string;
+  amount: number;
+  category: string;
+  period: string;
+  periodNumber: number;
+  startDate?: Date;
+}

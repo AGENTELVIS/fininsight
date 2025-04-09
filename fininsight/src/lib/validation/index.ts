@@ -55,3 +55,11 @@ export const AccountValidation = z.object({
       name: z.string().min(1,"Name is required"),
       amount: z.coerce.number().positive().min(1).max(9999999),
 })
+
+export const BudgetValidation = z.object({
+  amount: z.coerce.number().positive().min(1).max(9999999),
+  category: z.string().min(1,"Please select a category"),
+  period: z.string(),
+  periodNumber: z.coerce.number().min(1),
+  startDate:z.coerce.date().optional(),
+})

@@ -141,7 +141,12 @@ const AccountDrawer = ({ account, isOpen, setIsOpen }: AccountDrawerProps) => {
                         </Button>
                     </DrawerClose>
                     {account && (
-                        <DeleteDialog accountId={account.$id} setIsOpen={setIsOpen}/> // Move DeleteDialog here
+                        <DeleteDialog 
+                        itemId={account.$id}
+                        onDelete={deleteAccount}
+                        title="Delete Account?"
+                        description="Deleting this account will remove all associated transactions."
+                        buttonText="Delete Account"/> // Move DeleteDialog here
                     )}
                 </DrawerFooter>
             </DrawerContent>
