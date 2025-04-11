@@ -15,6 +15,23 @@ import {
 } from "@/components/ui/popover"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { 
+  ShoppingBag, 
+  Utensils, 
+  Home, 
+  Film, 
+  Receipt, 
+  Plane, 
+  HeartPulse, 
+  GraduationCap, 
+  CreditCard, 
+  Gift, 
+  Briefcase, 
+  TrendingUp, 
+  Wallet, 
+  RefreshCw, 
+  Building2 
+} from "lucide-react"
 
 type CategoryDropdownProps = {
   value: string;
@@ -25,29 +42,81 @@ type CategoryDropdownProps = {
 type Status = {
   value: string;
   label: string;
+  icon: React.ReactNode;
+};
+
+const getCategoryIcon = (category: string, type: string) => {
+  const iconSize = "h-4 w-4";
+  const iconClass = "text-gray-500";
+
+  if (type === "income") {
+    switch (category) {
+      case "salary":
+        return <Wallet className={`${iconSize} ${iconClass}`} />;
+      case "freelance":
+        return <Briefcase className={`${iconSize} ${iconClass}`} />;
+      case "investment":
+        return <TrendingUp className={`${iconSize} ${iconClass}`} />;
+      case "gift":
+        return <Gift className={`${iconSize} ${iconClass}`} />;
+      case "refund":
+        return <RefreshCw className={`${iconSize} ${iconClass}`} />;
+      case "bonus":
+        return <Wallet className={`${iconSize} ${iconClass}`} />;
+      case "rental_income":
+        return <Building2 className={`${iconSize} ${iconClass}`} />;
+      default:
+        return <Wallet className={`${iconSize} ${iconClass}`} />;
+    }
+  } else {
+    switch (category) {
+      case "shopping":
+        return <ShoppingBag className={`${iconSize} ${iconClass}`} />;
+      case "food":
+        return <Utensils className={`${iconSize} ${iconClass}`} />;
+      case "home":
+        return <Home className={`${iconSize} ${iconClass}`} />;
+      case "entertainment":
+        return <Film className={`${iconSize} ${iconClass}`} />;
+      case "bills":
+        return <Receipt className={`${iconSize} ${iconClass}`} />;
+      case "travel":
+        return <Plane className={`${iconSize} ${iconClass}`} />;
+      case "health":
+        return <HeartPulse className={`${iconSize} ${iconClass}`} />;
+      case "education":
+        return <GraduationCap className={`${iconSize} ${iconClass}`} />;
+      case "subscriptions":
+        return <CreditCard className={`${iconSize} ${iconClass}`} />;
+      case "other":
+        return <Receipt className={`${iconSize} ${iconClass}`} />;
+      default:
+        return <Receipt className={`${iconSize} ${iconClass}`} />;
+    }
+  }
 };
 
 const incomeCategories: Status[] = [
-  { value: "salary", label: "Salary" },
-  { value: "freelance", label: "Freelance" },
-  { value: "investment", label: "Investment" },
-  { value: "gift", label: "Gift" },
-  { value: "refund", label: "Refund" },
-  { value: "bonus", label: "Bonus" },
-  { value: "rental_income", label: "Rental Income" },
+  { value: "salary", label: "Salary", icon: <Wallet className="h-4 w-4 text-gray-500" /> },
+  { value: "freelance", label: "Freelance", icon: <Briefcase className="h-4 w-4 text-gray-500" /> },
+  { value: "investment", label: "Investment", icon: <TrendingUp className="h-4 w-4 text-gray-500" /> },
+  { value: "gift", label: "Gift", icon: <Gift className="h-4 w-4 text-gray-500" /> },
+  { value: "refund", label: "Refund", icon: <RefreshCw className="h-4 w-4 text-gray-500" /> },
+  { value: "bonus", label: "Bonus", icon: <Wallet className="h-4 w-4 text-gray-500" /> },
+  { value: "rental_income", label: "Rental Income", icon: <Building2 className="h-4 w-4 text-gray-500" /> },
 ];
 
 const expenseCategories: Status[] = [
-  { value: "shopping", label: "Shopping" },
-  { value: "food", label: "Food" },
-  { value: "home", label: "Home" },
-  { value: "entertainment", label: "Entertainment" },
-  { value: "bills", label: "Bills" },
-  { value: "travel", label: "Travel" },
-  { value: "health", label: "Health" },
-  { value: "education", label: "Education" },
-  { value: "subscriptions", label: "Subscriptions" },
-  { value: "other", label: "Other" },
+  { value: "shopping", label: "Shopping", icon: <ShoppingBag className="h-4 w-4 text-gray-500" /> },
+  { value: "food", label: "Food", icon: <Utensils className="h-4 w-4 text-gray-500" /> },
+  { value: "home", label: "Home", icon: <Home className="h-4 w-4 text-gray-500" /> },
+  { value: "entertainment", label: "Entertainment", icon: <Film className="h-4 w-4 text-gray-500" /> },
+  { value: "bills", label: "Bills", icon: <Receipt className="h-4 w-4 text-gray-500" /> },
+  { value: "travel", label: "Travel", icon: <Plane className="h-4 w-4 text-gray-500" /> },
+  { value: "health", label: "Health", icon: <HeartPulse className="h-4 w-4 text-gray-500" /> },
+  { value: "education", label: "Education", icon: <GraduationCap className="h-4 w-4 text-gray-500" /> },
+  { value: "subscriptions", label: "Subscriptions", icon: <CreditCard className="h-4 w-4 text-gray-500" /> },
+  { value: "other", label: "Other", icon: <Receipt className="h-4 w-4 text-gray-500" /> },
 ];
 
 const CategoryDropdown = ({ value, onChange, type }: CategoryDropdownProps) => {
@@ -64,7 +133,16 @@ const CategoryDropdown = ({ value, onChange, type }: CategoryDropdownProps) => {
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {selectedCategory ? selectedCategory.label : "Select category..."}
+          <div className="flex items-center gap-2">
+            {selectedCategory ? (
+              <>
+                {selectedCategory.icon}
+                {selectedCategory.label}
+              </>
+            ) : (
+              "Select category..."
+            )}
+          </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -83,13 +161,16 @@ const CategoryDropdown = ({ value, onChange, type }: CategoryDropdownProps) => {
                     setOpen(false);
                   }}
                 >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === category.value ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {category.label}
+                  <div className="flex items-center gap-2">
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === category.value ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {category.icon}
+                    {category.label}
+                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>

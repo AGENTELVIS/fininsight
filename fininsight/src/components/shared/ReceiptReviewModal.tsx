@@ -7,6 +7,23 @@ import { useUserContext } from '@/context/AuthContext';
 import AccountDropdown from './AccountDropdown';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { 
+  ShoppingBag, 
+  Utensils, 
+  Home, 
+  Film, 
+  Receipt, 
+  Plane, 
+  HeartPulse, 
+  GraduationCap, 
+  CreditCard, 
+  Gift, 
+  Briefcase, 
+  TrendingUp, 
+  Wallet, 
+  RefreshCw, 
+  Building2 
+} from "lucide-react";
 
 type ReceiptReviewModalProps = {
   isOpen: boolean;
@@ -14,6 +31,36 @@ type ReceiptReviewModalProps = {
   data: ExtractedData;
   onConfirm: (accountId: string, saveImage: boolean) => void;
   imagePreview?: string;
+};
+
+const getCategoryIcon = (category: string) => {
+  const iconSize = "h-4 w-4";
+  const iconClass = "text-gray-500";
+
+  switch (category) {
+    case "shopping":
+      return <ShoppingBag className={`${iconSize} ${iconClass}`} />;
+    case "food":
+      return <Utensils className={`${iconSize} ${iconClass}`} />;
+    case "home":
+      return <Home className={`${iconSize} ${iconClass}`} />;
+    case "entertainment":
+      return <Film className={`${iconSize} ${iconClass}`} />;
+    case "bills":
+      return <Receipt className={`${iconSize} ${iconClass}`} />;
+    case "travel":
+      return <Plane className={`${iconSize} ${iconClass}`} />;
+    case "health":
+      return <HeartPulse className={`${iconSize} ${iconClass}`} />;
+    case "education":
+      return <GraduationCap className={`${iconSize} ${iconClass}`} />;
+    case "subscriptions":
+      return <CreditCard className={`${iconSize} ${iconClass}`} />;
+    case "other":
+      return <Receipt className={`${iconSize} ${iconClass}`} />;
+    default:
+      return <Receipt className={`${iconSize} ${iconClass}`} />;
+  }
 };
 
 const ReceiptReviewModal: React.FC<ReceiptReviewModalProps> = ({
@@ -64,7 +111,10 @@ const ReceiptReviewModal: React.FC<ReceiptReviewModalProps> = ({
           
           <div>
             <p className="text-sm text-gray-500">Category</p>
-            <p className="font-medium">{data.category}</p>
+            <div className="flex items-center gap-2">
+              {data.category && getCategoryIcon(data.category)}
+              <p className="font-medium capitalize">{data.category || 'other'}</p>
+            </div>
           </div>
 
           <div>

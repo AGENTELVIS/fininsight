@@ -144,17 +144,15 @@ const CardForm = ({ transaction, onClose }: CardFormProps) => {
 
   return (
     <>
-      <Card className="p-6">
-        <div className="space-y-4">
-          <ReceiptDropzone />
-          <Button 
-            className="w-full" 
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add Transaction Manually
-          </Button>
-        </div>
-      </Card>
+      <div className="relative">
+        <ReceiptDropzone />
+        <Button 
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-40 bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-md"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Add Transaction
+        </Button>
+      </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-md p-0 z-[100]" aria-describedby="transaction-form-description">

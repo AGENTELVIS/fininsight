@@ -162,6 +162,7 @@ const ReceiptDropzone: React.FC = () => {
             </p>
             {loading && <p className="text-sm text-blue-500">Processing receipt...</p>}
           </div>
+
         </div>
       </Card>
 
@@ -190,4 +191,4 @@ const ReceiptDropzone: React.FC = () => {
   );
 };
 
-export default ReceiptDropzone; 
+export default ReceiptDropzone;

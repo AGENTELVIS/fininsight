@@ -33,23 +33,23 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onExtract, file }) => {
         Analyze the items, merchant name, and overall purchase context to determine the most appropriate category.
         
         Category guidelines:
-        - Food: Restaurants, groceries, cafes, food delivery
-        - Shopping: Retail stores, clothing, electronics
-        - Travel: Airlines, hotels, car rentals, transportation
-        - Entertainment: Movies, events, streaming services
-        - Health: Medical expenses, pharmacy, fitness
-        - Home: Utilities, furniture, home improvement
-        - Education: Books, courses, school supplies
-        - Bills: Regular monthly services, utilities
-        - Subscriptions: Regular recurring payments, memberships
-        - Other: Anything that doesn't fit above categories
+        - food: Restaurants, groceries, cafes, food delivery
+        - shopping: Retail stores, clothing, electronics
+        - travel: Airlines, hotels, car rentals, transportation
+        - entertainment: Movies, events, streaming services
+        - health: Medical expenses, pharmacy, fitness
+        - home: Utilities, furniture, home improvement
+        - education: Books, courses, school supplies
+        - bills: Regular monthly services, utilities
+        - subscriptions: Regular recurring payments, memberships
+        - other: Anything that doesn't fit above categories
 
         Return only a JSON object like this:
         {
           "merchant": "string",
           "total": "number (in string form, like '123.45')",
           "date": "DD-MM-YYYY",
-          "category": "Home | Travel | Shopping | Entertainment | Food | Health | Education | Bills | Subscriptions | Other"
+          "category": "home | travel | shopping | entertainment | food | health | education | bills | subscriptions | other"
         }
 
         If it is not a receipt, return only: {}
