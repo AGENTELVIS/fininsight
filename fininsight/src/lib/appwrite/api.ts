@@ -1,7 +1,7 @@
 import { ID, Query } from "appwrite";
 import { INewUser, INewData, INewAccount, INewBudget } from "../../types/index.ts";
 import { addDays, addWeeks, addMonths, addYears } from "date-fns";
-import { account, appwriteConfig} from "./config.js";
+import { account, appwriteConfig, storage} from "./config.js";
 import {  avatars , databases } from "./config.js";
 
 
@@ -138,43 +138,45 @@ export async function signOutAccount(){
 
 
 
-export async function createTransaction(transaction : INewData){
-  console.log("Calling updateAccountBalance from createTransaction");
+export async function createTransaction(transaction: INewData) {
   try {
-    const currentUser = await getCurrentUser();
-    if (!currentUser) throw new Error("User is not authenticated");
+    const user = await getCurrentUser();
+    if (!user) throw new Error("User not authenticated");
 
-    if (!transaction.date) throw new Error("Transaction must have a date");
+    if (!transaction.date) {
+      throw new Error("Transaction date is required");
+    }
 
-    const formattedDate = new Date(transaction.date).toISOString();
-      
+    console.log("Creating transaction with data:", transaction);
+
     const newTransaction = await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
       ID.unique(),
       {
-        creator: transaction.userId,
+        creator: user.$id,
         amount: transaction.amount,
         category: transaction.category,
-        note: transaction.note || "",
-        date: formattedDate,
+        note: transaction.note,
+        date: new Date(transaction.date).toISOString(), // ✅ FIXED HERE
         type: transaction.type,
         account: transaction.account,
-        isRecurring: transaction.isRecurring || false,
-        interval: transaction.isRecurring ? transaction.interval : null,
-        enddate: transaction.isRecurring ? transaction.enddate : null,
+        imageId: transaction.imageId,
+        imageUrl: transaction.imageUrl,
       }
-    );
-    console.log("Calling updateAccountBalance from createTransaction");
-    console.log("Updating balance for account:", account);
+    );    
 
-    if(!transaction.isRecurring){
-      await updateAccountBalance(transaction.account, transaction.amount, transaction.type);
+    if (!newTransaction) {
+      throw new Error("Failed to create transaction");
     }
+
+    // Update account balance
+    await updateAccountBalance(transaction.account, transaction.amount, transaction.type);
 
     return newTransaction;
   } catch (error) {
-    console.log(error);
+    console.error("Error creating transaction:", error);
+    throw error;
   }
 }
 
@@ -531,21 +533,16 @@ export async function getCurrentMonthTransactions(userId?:string){
   if (!userId) return {documents: []};
 
   try {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
-
-    const monthlyTransactions = await databases.listDocuments(
+    const transactions = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
       [
         Query.equal("creator", userId),
-        Query.greaterThanEqual("date", startOfMonth),
-        Query.lessThanEqual("date", endOfMonth),
+        Query.orderDesc("date")
       ]
     );
 
-    return monthlyTransactions ?? { documents: [] };
+    return transactions ?? { documents: [] };
   } catch (error) {
     console.log(error);
     return { documents: [] };
@@ -630,4 +627,161 @@ export function groupTransactionsByMonth(transactions: { amount: number; date: s
     income: grouped[month]?.income || 0,
     expense: grouped[month]?.expense || 0,
   }));
+}
+
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY); // use your environment variable
+
+export async function scanReceipt(file: File) {
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = btoa(
+      new Uint8Array(arrayBuffer).reduce(
+        (data, byte) => data + String.fromCharCode(byte),
+        ""
+      )
+    );
+
+    const prompt = `
+      You are an expert in analyzing receipt data.
+      
+      Extract the following from this receipt image:
+      {
+        "amount": number,
+        "date": "ISO date string",
+        "description": "string",
+        "merchantName": "string",
+        "category": "string"
+      }
+      If not a receipt, return {}.
+    `;
+
+    const result = await model.generateContent([
+      {
+        inlineData: {
+          data: base64,
+          mimeType: file.type,
+        },
+      },
+      prompt,
+    ]);
+
+    const response = await result.response;
+    const text = response.text();
+    const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
+
+    const data = JSON.parse(cleanedText);
+    return data;
+  } catch (err) {
+    console.error("Failed to scan receipt:", err);
+    throw err;
+  }
+}
+
+export type TimeRange = 'week' | 'month' | 'year';
+
+export function getDateRange(range: TimeRange) {
+  const now = new Date();
+  const start = new Date();
+
+  switch (range) {
+    case 'week':
+      start.setDate(now.getDate() - now.getDay());
+      break;
+    case 'month':
+      start.setDate(1);
+      break;
+    case 'year':
+      start.setMonth(0, 1);
+      break;
+  }
+
+  return { start, end: now };
+}
+
+export async function getCashFlow(userId: string, range: TimeRange) {
+  const { start, end } = getDateRange(range);
+  
+  const transactions = await databases.listDocuments(
+    appwriteConfig.databaseId,
+    appwriteConfig.transactionsCollectionId,
+    [
+      Query.equal("creator", userId),
+      Query.greaterThanEqual("date", start.toISOString()),
+      Query.lessThanEqual("date", end.toISOString()),
+    ]
+  );
+
+  const cashFlow = {
+    income: 0,
+    expense: 0,
+    total: 0
+  };
+
+  transactions.documents.forEach((tx: any) => {
+    if (tx.type === 'income') {
+      cashFlow.income += tx.amount;
+    } else {
+      cashFlow.expense += tx.amount;
+    }
+  });
+
+  cashFlow.total = cashFlow.income - cashFlow.expense;
+  return cashFlow;
+}
+
+export async function getCategoryWiseData(userId: string, range: TimeRange, type: 'income' | 'expense') {
+  const { start, end } = getDateRange(range);
+  
+  try {
+    const transactions = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.transactionsCollectionId,
+      [
+        Query.equal("creator", userId),
+        Query.equal("type", type),
+        Query.greaterThanEqual("date", start.toISOString()),
+        Query.lessThanEqual("date", end.toISOString()),
+      ]
+    );
+
+    const categoryTotals: Record<string, number> = {};
+
+    transactions.documents.forEach((tx: any) => {
+      const category = tx.category;
+      if (category) {
+        categoryTotals[category] = (categoryTotals[category] || 0) + Number(tx.amount);
+      }
+    });
+
+    return Object.entries(categoryTotals)
+      .map(([category, total]) => ({
+        category,
+        total
+      }))
+      .sort((a, b) => b.total - a.total);
+  } catch (error) {
+    console.error('Error in getCategoryWiseData:', error);
+    return [];
+  }
+}
+
+export async function uploadFile(file: File) {
+  try {
+    const fileId = ID.unique();
+    await storage.createFile(
+      appwriteConfig.storageId,
+      fileId,
+      file
+    );
+    
+    const fileUrl = storage.getFileView(appwriteConfig.storageId, fileId);
+    return { fileId, fileUrl: fileUrl.toString() };
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
 }

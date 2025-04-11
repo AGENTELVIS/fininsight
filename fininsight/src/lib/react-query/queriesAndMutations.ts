@@ -54,6 +54,7 @@ export const useCreateTransaction = () => {
     return useMutation({
         mutationFn: (transaction : INewData) => createTransaction(transaction),
         onSuccess: () => {
+            console.log("Transaction created successfully");
             queryClient.invalidateQueries({
                 queryKey: [Query_Keys.GET_RECENT_TRANSACTIONS]
             }); // Refresh transaction data

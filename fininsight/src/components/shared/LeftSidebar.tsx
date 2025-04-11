@@ -33,7 +33,7 @@ const LeftSidebar = () => {
   };
   
   return (
-    <nav className="hidden md:flex flex-col justify-between w-72 bg-slate-50 shadow-xl rounded-xl border-2 m-3">
+    <nav className="hidden md:flex flex-col justify-between w-72 bg-slate-50 shadow-xl rounded-xl border-2 m-3 z-10">
       <div className="flex flex-col gap-10 p-5">
         {/* Logo */}
         <Link to="/" className="flex items-center">

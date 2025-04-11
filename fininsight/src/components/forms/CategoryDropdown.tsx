@@ -13,6 +13,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Check, ChevronsUpDown } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 type CategoryDropdownProps = {
   value: string;
@@ -50,53 +52,51 @@ const expenseCategories: Status[] = [
 
 const CategoryDropdown = ({ value, onChange, type }: CategoryDropdownProps) => {
   const [open, setOpen] = React.useState(false);
-  const [selectedStatus, setSelectedStatus] = React.useState<Status | null>(null);
-
   const availableCategories = type === "income" ? incomeCategories : expenseCategories;
-
-  React.useEffect(() => {
-    if (value === "") {
-      setSelectedStatus(null);
-    } else {
-      setSelectedStatus(availableCategories.find((status) => status.value === value) || null);
-    }
-  }, [value, type]);
+  const selectedCategory = availableCategories.find((category) => category.value === value);
 
   return (
-    <div className="flex items-center space-x-4 w-full">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="w-full justify-center">
-            {selectedStatus ? selectedStatus.label : "Select category"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="z-50 p-0">
-          <Command>
-            <CommandInput placeholder="Select category..." />
-            <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup>
-                {availableCategories.map((status) => (
-                  <CommandItem
-                    key={status.value}
-                    value={status.value}
-                    onSelect={(value) => {
-                      onChange(value);
-                      setSelectedStatus(
-                        availableCategories.find((item) => item.value === value) || null
-                      );
-                      setOpen(false);
-                    }}
-                  >
-                    {status.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
+    <Popover open={open} onOpenChange={setOpen} modal={true}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between"
+        >
+          {selectedCategory ? selectedCategory.label : "Select category..."}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0 z-[9999]" align="start">
+        <Command>
+          <CommandInput placeholder="Search category..." />
+          <CommandEmpty>No category found.</CommandEmpty>
+          <CommandList>
+            <CommandGroup>
+              {availableCategories.map((category) => (
+                <CommandItem
+                  key={category.value}
+                  value={category.value}
+                  onSelect={() => {
+                    onChange(category.value);
+                    setOpen(false);
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value === category.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {category.label}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };
 

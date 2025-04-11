@@ -13,43 +13,17 @@ export const SigninValidation = z.object({
   })
 
 export const CardValidation = z.object({
-    amount: z.coerce.number().positive().min(1).max(9999999),
+    amount: z.coerce.number().positive().min(1,"Amount must be greater than 0").max(9999999),
     category: z.string().min(1,"Please select a category"),
-    note:  z.string().max(2200),
+    note: z.string().max(2200),
     date: z.coerce.date(),
     type: z.string(),
-    account: z.string().min(1),
-    isRecurring:z.boolean().default(false),
-    interval: z.string().optional(),
-    enddate: z.coerce.date().optional()
-  })
-    .superRefine((data, ctx) => {
-      const today = new Date();
-      const date = new Date(data.date); // Convert to Date object
-      today.setHours(0, 0, 0, 0); // Normalize today's date to remove time part
-    
-      // Start date validation: If recurring, date must be today or future
-      if (data.isRecurring && date.getTime() < today.getTime()) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["date"],
-          message: "Start date cannot be in the past for recurring transactions.",
-        });
-      }
-    
-      // End date validation: Must be after start date
-      if (data.enddate) {
-        const enddate = new Date(data.enddate); // Convert to Date object
-    
-        if (enddate.getTime() <= date.getTime()) {
-          ctx.addIssue({
-            code: "custom",
-            path: ["enddate"],
-            message: "End date must be after the start date.",
-          });
-        }
-      }
-    });
+    account: z.string().min(1,"Please select an Account"),
+    imageId: z.string().optional(),
+    imageUrl: z.string().optional().refine((val) => {
+      return !val || /^https?:\/\/.+$/.test(val);
+    }, { message: "Invalid url" }),
+});
 
 export const AccountValidation = z.object({
       name: z.string().min(1,"Name is required"),

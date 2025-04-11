@@ -35,11 +35,10 @@ export type INewData = {
   category: string;
   note?: string;
   date: Date;
-  type :string;
+  type: string;
   account: string;
-  isRecurring:Boolean;
-  interval?:string;
-  enddate?:Date;
+  imageId?: string;
+  imageUrl?: string;
 };
 
 export type INewAccount = {
@@ -56,3 +55,10 @@ export type INewBudget = {
   periodNumber: number;
   startDate?: Date;
 }
+
+export type ExtractedData = {
+  merchant?: string;
+  total?: string;
+  date?: string;
+  category?: string;
+};

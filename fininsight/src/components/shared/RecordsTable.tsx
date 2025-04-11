@@ -5,8 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Models } from "appwrite";
 import { Trash, Edit } from "lucide-react";
-import Modal from "@/_root/pages/UpdateTransactions"; // Import Modal
-import CardForm from "@/components/forms/CardForm"; // Import CardForm
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import CardForm from "@/components/forms/CardForm";
 import { useQueryClient } from "@tanstack/react-query";
 import { Query_Keys } from "@/lib/react-query/queryKeys";
 import DeleteDialog from "./DeleteDialog";
@@ -22,7 +22,7 @@ const RecordsTable: React.FC = () => {
 
   const handleDeleteTransaction = async (transactionId: string) => {
     await deleteTransaction(transactionId);
-    queryClient.invalidateQueries([Query_Keys.GET_USER_TRANSACTIONS]); // Refresh transactions
+    queryClient.invalidateQueries([Query_Keys.GET_USER_TRANSACTIONS]);
   };
   
   if (isLoading) return <p>Loading transactions...</p>;
@@ -38,12 +38,8 @@ const RecordsTable: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  const handleDelete = async (transactionId: string) => {
-    await deleteTransaction(transactionId);
-  };
-
   return (
-    <div className=" overflow-x-auto bg-white shadow-md rounded-lg p-4">
+    <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4">
       <h2 className="text-lg font-semibold mb-4">Your Transactions</h2>
 
       <Table>
@@ -70,14 +66,14 @@ const RecordsTable: React.FC = () => {
                 <Button onClick={() => handleEdit(transaction)} size="sm">
                   <Edit className="w-4 h-4" />
                 </Button>
-                <Button variant="destructive" size="xs" className="items-center">
+                <Button variant="destructive" size="sm" className="items-center">
                   <DeleteDialog
-                        itemId={transaction.$id}
-                        onDelete={handleDeleteTransaction}
-                        title=""
-                        description="Are you sure you want to delete this transaction? This action cannot be undone."
-                        buttonText= {<Trash />}
-                    />
+                    itemId={transaction.$id}
+                    onDelete={handleDeleteTransaction}
+                    title=""
+                    description="Are you sure you want to delete this transaction? This action cannot be undone."
+                    buttonText="Delete"
+                  />
                 </Button>
               </TableCell>
             </TableRow>
@@ -87,10 +83,11 @@ const RecordsTable: React.FC = () => {
 
       {transactions?.documents?.length === 0 && <p className="text-gray-500 text-center mt-4">No transactions found.</p>}
 
-      {/* Modal for editing transaction */}
-      <Modal isOpen={isModalOpen} onClose={handleClose}>
-        <CardForm transaction={selectedTransaction || undefined} onClose={() => setIsModalOpen(false)}/>
-      </Modal>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-md p-0 z-[100]">
+          <CardForm transaction={selectedTransaction || undefined} onClose={handleClose} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

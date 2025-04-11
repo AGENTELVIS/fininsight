@@ -13,7 +13,7 @@ const IntervalDropdown = forwardRef<HTMLButtonElement, IntervalDropdownProps>(
         <SelectTrigger ref={ref}>
           <SelectValue placeholder="Select Interval" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="z-[100]">
           <SelectItem value="daily">Daily</SelectItem>
           <SelectItem value="weekly">Weekly</SelectItem>
           <SelectItem value="monthly">Monthly</SelectItem>

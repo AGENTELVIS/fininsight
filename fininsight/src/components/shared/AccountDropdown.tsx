@@ -18,7 +18,7 @@ const AccountDropdown = ({ value, onChange }: AccountDropdownProps) => {
       <SelectTrigger>
         <SelectValue placeholder={isLoading ? "Loading..." : "Select an account"} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-[100]">
       {isError ? (
           <p className="text-red-500">Failed to load accounts</p>
         ) : (

@@ -31,9 +31,9 @@ const CreateTransactions = () => {
         </div>
 
         {/* Transaction Form */}
-        <Card className="p-10">
+        
           <CardForm />
-        </Card>
+       
 
         {isLoading && <Loader />}
 

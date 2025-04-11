@@ -16,30 +16,46 @@ type Props = {
 
 const BarChart: React.FC<Props> = ({ data }) => {
   return (
-    <div className="w-full h-64 z-0">
+    <div className="w-full h-96">
       <ResponsiveContainer width="100%" height="100%">
-        <ReBarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey={"day"} 
-            hide={true}
-            label={{ 
-              value: "Day of Week", 
-              position: "insideBottom", 
-              offset: -5 
-            }} 
+        <ReBarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis 
+            dataKey="day" 
+            tick={{ fill: '#666' }}
+            tickLine={{ stroke: '#666' }}
           />
           <YAxis 
-            label={{ 
-              value: "Amount ($)", 
-              angle: -90, 
-              position: "insideLeft"
-            }} 
+            tick={{ fill: '#666' }}
+            tickLine={{ stroke: '#666' }}
+            tickFormatter={(value) => `₹${value}`}
           />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="income" fill="#82ca9d" name="Income" />
-          <Bar dataKey="expense" fill="#ff6b6b" name="Expense" />
+          <Tooltip 
+            formatter={(value: number) => [`₹${value}`, 'Amount']}
+            contentStyle={{
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '8px',
+            }}
+          />
+          <Legend 
+            verticalAlign="top" 
+            height={36}
+            formatter={(value) => <span className="text-sm">{value}</span>}
+          />
+          <Bar 
+            dataKey="income" 
+            fill="#4ECDC4" 
+            name="Income"
+            radius={[4, 4, 0, 0]}
+          />
+          <Bar 
+            dataKey="expense" 
+            fill="#FF6B6B" 
+            name="Expense"
+            radius={[4, 4, 0, 0]}
+          />
         </ReBarChart>
       </ResponsiveContainer>
     </div>
