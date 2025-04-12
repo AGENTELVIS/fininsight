@@ -14,8 +14,8 @@ const Records = () => {
   const [activeTab, setActiveTab] = useState('transactions');
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="w-full max-w-7xl mx-auto px-4 py-6">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Records</h2>
       </div>
 
@@ -25,28 +25,32 @@ const Records = () => {
           <TabsTrigger value="budgets">Budgets</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="transactions" className="mt-6">
+        <TabsContent value="transactions" className="mt-6 w-full">
           {isTransactionsLoading ? (
-            <div className="space-y-4">
+            <div className="space-y-4 w-full">
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
             </div>
           ) : (
-            <RecordsTable transactions={transactions?.documents || []} />
+            <div className="w-full">
+              <RecordsTable transactions={transactions?.documents || []} />
+            </div>
           )}
         </TabsContent>
 
-        <TabsContent value="budgets" className="mt-6">
-          <Card className="p-6">
+        <TabsContent value="budgets" className="mt-6 w-full">
+          <Card className="w-full">
             {isBudgetsLoading ? (
-              <div className="space-y-4">
+              <div className="space-y-4 w-full p-6">
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-full" />
               </div>
             ) : (
-              <BudgetsTable budgets={budgets?.documents || []} />
+              <div className="w-full p-6">
+                <BudgetsTable budgets={budgets?.documents || []} />
+              </div>
             )}
           </Card>
         </TabsContent>

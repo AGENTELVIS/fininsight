@@ -698,27 +698,47 @@ export async function getAllTransactions(userId?: string): Promise<TransactionsR
   }
 }
 
-export function groupTransactionsByDay(transactions: { amount: number; date: string, type:string}[]) {
+export function groupTransactionsByDay(transactions: { amount: number; date: string, type: string}[] = []) {
   const grouped: Record<string, { income: number; expense: number }> = {};
 
+  // If no transactions, return empty data for all days
+  if (!transactions || transactions.length === 0) {
+    return Array.from({ length: 31 }, (_, i) => {
+      const day = (i + 1).toString();
+      return {
+        day,
+        income: 0,
+        expense: 0,
+      };
+    });
+  }
+
   transactions.forEach((tx) => {
-    const date = new Date(tx.date);
-    const day = date.getDate(); // 1 to 31
+    try {
+      if (!tx || !tx.date || !tx.type || !tx.amount) return;
+      
+      const date = new Date(tx.date);
+      if (isNaN(date.getTime())) return; // Skip invalid dates
+      
+      const day = date.getDate().toString(); // 1 to 31
+      const amount = Number(tx.amount) || 0;
 
-    if (!grouped[day]) {
-      grouped[day] = { income: 0, expense: 0 };
-    }
+      if (!grouped[day]) {
+        grouped[day] = { income: 0, expense: 0 };
+      }
 
-    if (tx.type === "income") {
-      grouped[day].income += tx.amount;
-    } else if (tx.type === "expense") {
-      grouped[day].expense += tx.amount;
+      if (tx.type === "income") {
+        grouped[day].income += amount;
+      } else if (tx.type === "expense") {
+        grouped[day].expense += amount;
+      }
+    } catch (error) {
+      console.warn('Error processing transaction:', tx, error);
     }
   });
 
-  
   // Prepare array for Recharts
-  const data = Array.from({ length: 31 }, (_, i) => {
+  return Array.from({ length: 31 }, (_, i) => {
     const day = (i + 1).toString();
     return {
       day,
@@ -726,8 +746,6 @@ export function groupTransactionsByDay(transactions: { amount: number; date: str
       expense: grouped[day]?.expense || 0,
     };
   });
-
-  return data;
 }
 
 export function groupTransactionsByWeek(transactions: { amount: number; date: string, type: string }[]) {
@@ -754,7 +772,7 @@ export function groupTransactionsByWeek(transactions: { amount: number; date: st
   }));
 }
 
-export function groupTransactionsByMonth(transactions: { amount: number; date: string, type: string}[]) {
+export function groupTransactionsByMonth(transactions: { amount: number; date: string, type: string}[] = []) {
   // Initialize an array of all months with their short names
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
@@ -764,20 +782,35 @@ export function groupTransactionsByMonth(transactions: { amount: number; date: s
   // Get current year
   const currentYear = new Date().getFullYear();
 
+  // If no transactions, return empty data for all months
+  if (!transactions || transactions.length === 0) {
+    return months.map(month => ({
+      day: month,
+      income: 0,
+      expense: 0
+    }));
+  }
+
   // Process each transaction
   transactions.forEach(tx => {
     try {
+      if (!tx || !tx.date || !tx.type || !tx.amount) return;
+      
       const date = new Date(tx.date);
+      if (isNaN(date.getTime())) return; // Skip invalid dates
+      
       if (date.getFullYear() === currentYear) {
         const monthIndex = date.getMonth();
         const monthKey = months[monthIndex];
         
         if (monthData.has(monthKey)) {
           const currentData = monthData.get(monthKey)!;
+          const amount = Number(tx.amount) || 0;
+          
           if (tx.type === "income") {
-            currentData.income += Number(tx.amount);
+            currentData.income += amount;
           } else if (tx.type === "expense") {
-            currentData.expense += Number(tx.amount);
+            currentData.expense += amount;
           }
           monthData.set(monthKey, currentData);
         }

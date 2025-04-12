@@ -109,18 +109,16 @@ const RecordsTable = ({ transactions }: RecordsTableProps) => {
   };
 
   return (
-    <div className="overflow-x-auto bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-lg font-semibold mb-4">Your Transactions</h2>
-
-      <Table>
+    <div className="w-full overflow-x-auto">
+      <Table className="w-full">
         <TableHeader>
           <TableRow className="bg-gray-100">
-            <TableHead>Date</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="w-[15%]">Date</TableHead>
+            <TableHead className="w-[20%]">Category</TableHead>
+            <TableHead className="w-[25%]">Description</TableHead>
+            <TableHead className="w-[15%]">Amount</TableHead>
+            <TableHead className="w-[15%]">Account</TableHead>
+            <TableHead className="w-[10%] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -147,27 +145,25 @@ const RecordsTable = ({ transactions }: RecordsTableProps) => {
                 {formatCurrency(transaction.amount)}
               </TableCell>
               <TableCell className="px-6 py-4">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  transaction.type === 'income' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {transaction.type}
+                <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  {transaction.account}
                 </span>
               </TableCell>
-              <TableCell className="flex space-x-2">
-                <Button onClick={() => handleEdit(transaction)} size="sm">
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button variant="destructive" size="sm" className="items-center">
-                  <DeleteDialog
-                    itemId={transaction.$id}
-                    onDelete={handleDeleteTransaction}
-                    title=""
-                    description="Are you sure you want to delete this transaction? This action cannot be undone."
-                    buttonText="Delete"
-                  />
-                </Button>
+              <TableCell className="px-6 py-4 text-right">
+                <div className="flex justify-end gap-2">
+                  <Button onClick={() => handleEdit(transaction)} size="sm">
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button variant="destructive" size="sm" className="items-center">
+                    <DeleteDialog
+                      itemId={transaction.$id}
+                      onDelete={handleDeleteTransaction}
+                      title=""
+                      description="Are you sure you want to delete this transaction? This action cannot be undone."
+                      buttonText="Delete"
+                    />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
