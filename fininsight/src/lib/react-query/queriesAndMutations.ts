@@ -233,9 +233,9 @@ export const useGetUserBudgets = (userId?: string) => {
         queryKey: [Query_Keys.GET_USER_BUDGETS, userId],
         queryFn: () => getUserBudgets(userId),
         enabled: !!userId,
-        refetchInterval: 1000,
+        refetchInterval: false,
         refetchIntervalInBackground: true,
-        staleTime: 0,
+        staleTime: 1000 * 60 * 5,
     });
 };
 
