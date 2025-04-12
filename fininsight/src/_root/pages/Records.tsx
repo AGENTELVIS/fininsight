@@ -1,15 +1,19 @@
 import { useUserContext } from '@/context/AuthContext';
-import { useGetAllTransactions, useGetUserBudgets } from '@/lib/react-query/queriesAndMutations';
+import { useGetAllTransactions, useGetUserBudgets, useSearchTransactions } from '@/lib/react-query/queriesAndMutations';
 import { Card } from '@/components/ui/card';
 import RecordsTable from '@/components/shared/RecordsTable';
 import BudgetsTable from '@/components/shared/BudgetsTable';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Records = () => {
   const { user } = useUserContext();
-  const { data: transactions, isLoading: isTransactionsLoading } = useGetAllTransactions(user?.id);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [timeFilter, setTimeFilter] = useState<"all" | "week" | "month" | "year">("all");
+  const { data: transactions, isLoading: isTransactionsLoading } = useSearchTransactions(user?.id || "", searchTerm, timeFilter);
   const { data: budgets, isLoading: isBudgetsLoading } = useGetUserBudgets(user?.id);
   const [activeTab, setActiveTab] = useState('transactions');
 
@@ -26,6 +30,27 @@ const Records = () => {
         </TabsList>
 
         <TabsContent value="transactions" className="mt-6 w-full">
+          <div className="flex gap-4 mb-6">
+            <Input
+              type="text"
+              placeholder="Search by type, category, amount"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1"
+            />
+            <Select value={timeFilter} onValueChange={(value: "all" | "week" | "month" | "year") => setTimeFilter(value)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select time period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="year">This Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {isTransactionsLoading ? (
             <div className="space-y-4 w-full">
               <Skeleton className="h-8 w-full" />

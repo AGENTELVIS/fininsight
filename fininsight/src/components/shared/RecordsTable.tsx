@@ -5,11 +5,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Models } from "appwrite";
 import { Trash, Edit } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CardForm from "@/components/forms/CardForm";
 import { useQueryClient } from "@tanstack/react-query";
 import { Query_Keys } from "@/lib/react-query/queryKeys";
-import DeleteDialog from "./DeleteDialog";
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/utils';
 import { 
@@ -114,10 +113,9 @@ const RecordsTable = ({ transactions }: RecordsTableProps) => {
         <TableHeader>
           <TableRow className="bg-gray-100">
             <TableHead className="w-[15%]">Date</TableHead>
-            <TableHead className="w-[20%]">Category</TableHead>
-            <TableHead className="w-[25%]">Description</TableHead>
-            <TableHead className="w-[15%]">Amount</TableHead>
-            <TableHead className="w-[15%]">Account</TableHead>
+            <TableHead className="w-[25%]">Category</TableHead>
+            <TableHead className="w-[30%]">Description</TableHead>
+            <TableHead className="w-[20%]">Amount</TableHead>
             <TableHead className="w-[10%] text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -144,24 +142,27 @@ const RecordsTable = ({ transactions }: RecordsTableProps) => {
               }`}>
                 {formatCurrency(transaction.amount)}
               </TableCell>
-              <TableCell className="px-6 py-4">
-                <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  {transaction.account}
-                </span>
-              </TableCell>
               <TableCell className="px-6 py-4 text-right">
                 <div className="flex justify-end gap-2">
-                  <Button onClick={() => handleEdit(transaction)} size="sm">
-                    <Edit className="w-4 h-4" />
+                  <Button 
+                    onClick={() => handleEdit(transaction)} 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 hover:bg-gray-100"
+                  >
+                    <Edit className="h-4 w-4 text-gray-600" />
                   </Button>
-                  <Button variant="destructive" size="sm" className="items-center">
-                    <DeleteDialog
-                      itemId={transaction.$id}
-                      onDelete={handleDeleteTransaction}
-                      title=""
-                      description="Are you sure you want to delete this transaction? This action cannot be undone."
-                      buttonText="Delete"
-                    />
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 hover:bg-red-50"
+                    onClick={() => {
+                      if (window.confirm("Are you sure you want to delete this transaction?")) {
+                        handleDeleteTransaction(transaction.$id);
+                      }
+                    }}
+                  >
+                    <Trash className="h-4 w-4 text-red-600" />
                   </Button>
                 </div>
               </TableCell>
@@ -173,8 +174,14 @@ const RecordsTable = ({ transactions }: RecordsTableProps) => {
       {transactions.length === 0 && <p className="text-gray-500 text-center mt-4">No transactions found.</p>}
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md p-0 z-[100]">
-          <CardForm transaction={selectedTransaction || undefined} onClose={handleClose} />
+        <DialogContent className="max-w-md p-0 z-[100] border-0">
+          <CardForm 
+            transaction={selectedTransaction || undefined} 
+            onClose={handleClose} 
+            isOpen={isModalOpen}
+            hideReceiptDropzone={true}
+            hideAddButton={true}
+          />
         </DialogContent>
       </Dialog>
     </div>
