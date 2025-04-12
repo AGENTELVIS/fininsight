@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { useSignOutAccount } from '@/lib/react-query/queriesAndMutations.ts';
-import { useUserContext } from '@/context/AuthContext.tsx';
+import { useUserContext, INITIAL_USER  } from '@/context/AuthContext.tsx';
 import { sidebarLinks } from '@/constants/index.ts';
 import { INavLink } from '@/types';
 import { Home, Wallet, ListChecks, FileText } from 'lucide-react';
@@ -10,25 +10,29 @@ import { Home, Wallet, ListChecks, FileText } from 'lucide-react';
 const LeftSidebar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user } = useUserContext();
+  const { user, setUser, setIsAuthenticated, isLoading } = useUserContext();
   const { mutate: signOut, isSuccess } = useSignOutAccount();
 
-  useEffect(() => {
-    if (isSuccess) navigate(0);
-  }, [isSuccess]);
+  const handleSignOut = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    signOut();
+    setIsAuthenticated(false);
+    setUser(INITIAL_USER);
+    navigate("/sign-in");
+  };
 
   const getIcon = (label: string) => {
     switch (label) {
       case 'Home':
         return <Home className="w-6 h-6" />;
-      case 'Budgets':
-        return <Wallet className="w-6 h-6" />;
       case 'Transactions':
         return <ListChecks className="w-6 h-6" />;
       case 'Records':
         return <FileText className="w-6 h-6" />;
       default:
-        return null; // Or a default icon
+        return null;
     }
   };
   

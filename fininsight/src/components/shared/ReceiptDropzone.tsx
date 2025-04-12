@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useCreateTransaction } from '@/lib/react-query/queriesAndMutations';
+import { useCreateTransaction, useGetUserAccounts } from '@/lib/react-query/queriesAndMutations';
 import { useUserContext } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -21,6 +21,7 @@ const ReceiptDropzone: React.FC = () => {
   const { mutateAsync: createTransaction } = useCreateTransaction();
   const { user } = useUserContext();
   const { toast } = useToast();
+  const { data: accounts } = useGetUserAccounts(user?.id);
 
   const onDrop = async (acceptedFiles: File[]) => {
     setIsDragging(false);
@@ -71,6 +72,18 @@ const ReceiptDropzone: React.FC = () => {
       return;
     }
 
+    // Check account balance for expenses
+    const selectedAccount = accounts?.documents.find(acc => acc.$id === accountId);
+    const amount = parseFloat(extractedData.total);
+    if (selectedAccount && selectedAccount.amount < amount) {
+      toast({
+        title: "Insufficient Balance",
+        description: `The selected account has insufficient balance. Current balance: ${selectedAccount.amount}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       let imageId = '';
       let imageUrl = '';
@@ -79,15 +92,14 @@ const ReceiptDropzone: React.FC = () => {
         // Upload image to storage
         const { fileId, fileUrl } = await uploadFile(selectedFile);
         imageId = fileId;
-        imageUrl = fileUrl;
+        imageUrl = fileUrl.toString(); // Ensure it's a string URL
       }
 
       // Convert amount to integer with proper rounding
-      const amount = parseFloat(extractedData.total);
       const decimalPart = amount % 1;
       const roundedAmount = decimalPart >= 0.5 ? Math.ceil(amount) : Math.floor(amount);
 
-      await createTransaction({
+      const transactionData = {
         userId: user.id,
         amount: roundedAmount,
         category: extractedData.category,
@@ -95,9 +107,11 @@ const ReceiptDropzone: React.FC = () => {
         date: new Date(extractedData.date.split('-').reverse().join('-')),
         type: 'expense',
         account: accountId,
-        imageId,
-        imageUrl,
-      });
+        imageId: imageId || undefined,
+        ...(imageUrl ? { imageUrl } : {}), // Only include imageUrl if it exists
+      };
+
+      await createTransaction(transactionData);
 
       toast({
         title: "Transaction created successfully!",

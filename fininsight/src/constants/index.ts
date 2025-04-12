@@ -1,4 +1,3 @@
-
 export const sidebarLinks = [
     {
       imgURL: "/assets/icons/react.svg",
@@ -6,13 +5,8 @@ export const sidebarLinks = [
       label: "Home",
     },
     {
-      imgURL: "/assets/icons/wallpaper.svg",
-      route: "/create-transactions",
-      label: "Budgets",
-    },
-    {
       imgURL: "/assets/icons/bookmark.svg",
-      route: "/upload-transactions",
+      route: "/create-transactions",
       label: "Transactions",
     },
     {
@@ -29,14 +23,9 @@ export const bottombarLinks = [
       label: "Home",
     },
     {
-      imgURL: "/assets/icons/wallpaper.svg",
+      imgURL: "/assets/icons/bookmark.svg",
       route: "/create-transactions",
       label: "Transactions",
-    },
-    {
-      imgURL: "/assets/icons/bookmark.svg",
-      route: "/upload-transactions",
-      label: "Reminders",
     },
     {
       imgURL: "/assets/icons/bookmark.svg",

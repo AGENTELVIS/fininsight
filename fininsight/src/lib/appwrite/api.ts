@@ -1,5 +1,5 @@
-import { ID, Query } from "appwrite";
-import { INewUser, INewData, INewAccount, INewBudget } from "../../types/index.ts";
+import { ID, Query, Models } from "appwrite";
+import { INewUser, INewData, INewAccount, INewBudget, IUpdateUser, IBudget, ITransaction, TransactionsResponse } from "../../types/index.ts";
 import { addDays, addWeeks, addMonths, addYears } from "date-fns";
 import { account, appwriteConfig, storage} from "./config.js";
 import {  avatars , databases } from "./config.js";
@@ -124,8 +124,6 @@ export async function getCurrentUser() {
   }
 }
 
-
-
 export async function signOutAccount(){
   try {
     const session = await account.deleteSession("current")
@@ -136,7 +134,137 @@ export async function signOutAccount(){
   }
 }
 
+export async function getUserById(userId: string) {
+  try {
+    const user = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      userId
+    );
 
+    if (!user) throw Error;
+
+    return user;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function deleteFile(fileId: string) {
+  try {
+    await storage.deleteFile(appwriteConfig.storageId, fileId);
+
+    return { status: "ok" };
+  } catch (error) {
+    console.log(error);
+  }
+}
+// ============================== UPDATE USER
+export async function updateUser(user: IUpdateUser) {
+  const hasFileToUpdate = user.file.length > 0;
+  try {
+    let image = {
+      imageUrl: user.imageUrl,
+      imageId: user.imageId,
+    };
+
+    if (hasFileToUpdate) {
+      const uploadedFile = await uploadFile(user.file[0]);
+      if (!uploadedFile) throw new Error("Upload failed");
+
+      const fileId = uploadedFile.fileId;
+      const fileUrl = getFileView(fileId);
+      if (!fileUrl) {
+        await deleteFile(fileId);
+        throw new Error("File view failed");
+      }
+
+      image = { ...image, imageUrl: fileUrl, imageId: fileId };
+    }
+
+    const updatedUser = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.userCollectionId,
+      user.userId,
+      {
+        name: user.name,
+        imageUrl: image.imageUrl,
+      }
+    );
+
+    if (!updatedUser) {
+      if (hasFileToUpdate) {
+        await deleteFile(image.imageId);
+      }
+      throw new Error("User update failed");
+    }
+
+    if (user.imageId && hasFileToUpdate) {
+      await deleteFile(user.imageId);
+    }
+
+    return updatedUser;
+  } catch (error) {
+    console.log("Update error:", error);
+  }
+}
+
+export function getFileView(fileId: string) {
+  try {
+    const fileUrl = storage.getFileView(
+      appwriteConfig.storageId,
+      fileId,
+    );
+
+    if (!fileUrl) throw Error;
+
+    return fileUrl;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function updateBudgetSpent(userId: string, category: string, amount: number, type: string) {
+  try {
+    // Get all budgets for this category
+    const budgets = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.budgetCollectionId,
+      [
+        Query.equal("creator", userId),
+        Query.equal("category", category)
+      ]
+    );
+
+    // Update each budget's spent amount
+    for (const budget of budgets.documents) {
+      try {
+        const currentSpent = Number(budget.spent || 0);
+        let newSpent = currentSpent;
+        
+        if (type === "expense") {
+          newSpent = currentSpent + amount;
+        } else if (type === "income") {
+          // If it's an income transaction, we don't update the spent amount
+          continue;
+        }
+        
+        await databases.updateDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.budgetCollectionId,
+          budget.$id,
+          { spent: newSpent }
+        );
+      } catch (err) {
+        console.warn(`Failed to update budget ${budget.$id}:`, err);
+        // Continue with other budgets even if one fails
+        continue;
+      }
+    }
+  } catch (error) {
+    console.error("Error updating budget spent amount:", error);
+  }
+}
 
 export async function createTransaction(transaction: INewData) {
   try {
@@ -158,7 +286,7 @@ export async function createTransaction(transaction: INewData) {
         amount: transaction.amount,
         category: transaction.category,
         note: transaction.note,
-        date: new Date(transaction.date).toISOString(), // ✅ FIXED HERE
+        date: new Date(transaction.date).toISOString(),
         type: transaction.type,
         account: transaction.account,
         imageId: transaction.imageId,
@@ -172,7 +300,13 @@ export async function createTransaction(transaction: INewData) {
 
     // Update account balance
     await updateAccountBalance(transaction.account, transaction.amount, transaction.type);
-
+    
+    try {
+      await updateBudgetSpent(user.$id, transaction.category, transaction.amount, transaction.type);
+    } catch (err) {
+      console.warn("Budget update failed but transaction created:", err);
+    }
+    
     return newTransaction;
   } catch (error) {
     console.error("Error creating transaction:", error);
@@ -464,8 +598,9 @@ export async function createBudget(budget: INewBudget) {
         amount: budget.amount,
         period: budget.period,
         periodNumber: budget.periodNumber,
-        startDate: startDate.toISOString(), // make sure it's stored as ISO string
+        startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
+        spent: 0, // Initialize spent to 0
       }
     );
 
@@ -476,20 +611,31 @@ export async function createBudget(budget: INewBudget) {
 }
 
 
-export async function getUserBudgets(userId?: string) {
-  if (!userId) return {documents: []};
+export async function getUserBudgets(userId?: string): Promise<{ documents: IBudget[] }> {
+  if (!userId) return { documents: [] };
 
   try {
-    const userAccounts = await databases.listDocuments(
+    const userBudgets = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.budgetCollectionId,
-      [Query.equal("creator", userId)]
+      [
+        Query.equal("creator", userId),
+        Query.orderDesc("$createdAt")
+      ]
     );
 
-    return userAccounts ?? { documents: [] }; // Ensure it's never `undefined`
+    // Ensure each budget has a spent field and matches the IBudget type
+    const budgetsWithSpent = userBudgets.documents.map(budget => ({
+      ...budget,
+      spent: Number(budget.spent || 0),
+      amount: Number(budget.amount),
+      periodNumber: Number(budget.periodNumber)
+    })) as IBudget[];
+
+    return { documents: budgetsWithSpent };
   } catch (error) {
-    console.log(error);
-    return { documents: [] }; // Prevent infinite loading
+    console.error("Error fetching user budgets:", error);
+    return { documents: [] };
   }
 }
 
@@ -529,8 +675,8 @@ export async function getCategoryWiseSpending(userId: string, start: Date, end: 
 }
 
 
-export async function getCurrentMonthTransactions(userId?:string){
-  if (!userId) return {documents: []};
+export async function getAllTransactions(userId?: string): Promise<TransactionsResponse> {
+  if (!userId) return { documents: [], total: 0 };
 
   try {
     const transactions = await databases.listDocuments(
@@ -542,10 +688,13 @@ export async function getCurrentMonthTransactions(userId?:string){
       ]
     );
 
-    return transactions ?? { documents: [] };
+    return {
+      documents: transactions.documents as ITransaction[],
+      total: transactions.total
+    };
   } catch (error) {
     console.log(error);
-    return { documents: [] };
+    return { documents: [], total: 0 };
   }
 }
 
@@ -605,27 +754,44 @@ export function groupTransactionsByWeek(transactions: { amount: number; date: st
   }));
 }
 
-export function groupTransactionsByMonth(transactions: { amount: number; date: string, type: string }[]) {
-  const grouped: Record<string, { income: number; expense: number }> = {};
+export function groupTransactionsByMonth(transactions: { amount: number; date: string, type: string}[]) {
+  // Initialize an array of all months with their short names
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  // Create a map to store the data for each month
+  const monthData = new Map(months.map(month => [month, { income: 0, expense: 0 }]));
 
-  transactions.forEach((tx) => {
-    const date = new Date(tx.date);
-    const month = date.toLocaleString("default", { month: "short" });
+  // Get current year
+  const currentYear = new Date().getFullYear();
 
-    if (!grouped[month]) grouped[month] = { income: 0, expense: 0 };
-
-    if (tx.type === "income") {
-      grouped[month].income += tx.amount;
-    } else {
-      grouped[month].expense += tx.amount;
+  // Process each transaction
+  transactions.forEach(tx => {
+    try {
+      const date = new Date(tx.date);
+      if (date.getFullYear() === currentYear) {
+        const monthIndex = date.getMonth();
+        const monthKey = months[monthIndex];
+        
+        if (monthData.has(monthKey)) {
+          const currentData = monthData.get(monthKey)!;
+          if (tx.type === "income") {
+            currentData.income += Number(tx.amount);
+          } else if (tx.type === "expense") {
+            currentData.expense += Number(tx.amount);
+          }
+          monthData.set(monthKey, currentData);
+        }
+      }
+    } catch (error) {
+      console.warn('Error processing transaction:', tx, error);
     }
   });
 
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  return months.map((month) => ({
+  // Convert the map to the required array format
+  return months.map(month => ({
     day: month,
-    income: grouped[month]?.income || 0,
-    expense: grouped[month]?.expense || 0,
+    income: monthData.get(month)?.income || 0,
+    expense: monthData.get(month)?.expense || 0
   }));
 }
 
@@ -785,3 +951,66 @@ export async function uploadFile(file: File) {
     throw error;
   }
 }
+
+export async function searchTransactions(userId: string, search: string, timeFilter: 'all' | 'week' | 'month' | 'year' = 'all') {
+  try {
+    const queries: any[] = [Query.equal("creator", userId)];
+
+    // Add date filter based on timeFilter
+    if (timeFilter !== 'all') {
+      const now = new Date();
+      const startDate = new Date();
+
+      switch (timeFilter) {
+        case 'week':
+          startDate.setDate(now.getDate() - now.getDay());
+          break;
+        case 'month':
+          startDate.setDate(1);
+          break;
+        case 'year':
+          startDate.setMonth(0, 1);
+          break;
+      }
+
+      queries.push(Query.greaterThanEqual("date", startDate.toISOString()));
+      queries.push(Query.lessThanEqual("date", now.toISOString()));
+    }
+
+    // If search term is empty, return filtered transactions
+    if (!search.trim()) {
+      return await databases.listDocuments(
+        appwriteConfig.databaseId,
+        appwriteConfig.transactionsCollectionId,
+        queries
+      );
+    }
+
+    // Convert search term to lowercase for case-insensitive matching
+    const searchTerm = search.toLowerCase();
+
+    // Add contains queries for string fields
+    const orFilters = [
+      Query.contains("category", searchTerm),
+      Query.contains("type", searchTerm),
+      Query.contains("note", searchTerm)
+    ];
+
+    // Add amount search if the search term is a number
+    if (!isNaN(Number(searchTerm))) {
+      orFilters.push(Query.equal("amount", Number(searchTerm)));
+    }
+
+    queries.push(Query.or(orFilters));
+
+    return await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.transactionsCollectionId,
+      queries
+    );
+  } catch (error) {
+    console.error("Error searching transactions:", error);
+    return { documents: [] };
+  }
+}
+

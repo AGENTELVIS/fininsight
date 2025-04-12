@@ -1,0 +1,177 @@
+/* Mobile-first toast styles */
+.toast-viewport {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9999; /* Increased z-index to be above modals */
+  width: 100%;
+  max-width: 100%;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column-reverse;
+  touch-action: pan-y;
+  pointer-events: none; /* Allow clicks to pass through the viewport */
+}
+
+/* Desktop styles */
+@media (min-width: 640px) {
+  .toast-viewport {
+    bottom: 0;
+    top: auto;
+    max-width: 420px;
+    flex-direction: column;
+  }
+}
+
+/* Toast container */
+.toast {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  background-color: white;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+  animation: slideIn 0.3s ease-out forwards;
+  pointer-events: auto; /* Enable clicks on the toast itself */
+  z-index: 10000; /* Ensure toast is above the viewport */
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast:active {
+  cursor: pointer;
+}
+
+/* Destructive toast variant */
+.toast.destructive {
+  background-color: #ef4444;
+  color: white;
+  border-color: #dc2626;
+}
+
+/* Toast title */
+.toast-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  flex: 1;
+  margin-right: 2rem; /* Make space for the close button */
+  pointer-events: none; /* Prevent text selection */
+}
+
+/* Toast description */
+.toast-description {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  opacity: 0.9;
+  flex: 1;
+  margin-right: 2rem; /* Make space for the close button */
+  pointer-events: none; /* Prevent text selection */
+}
+
+/* Toast close button */
+.toast-close {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  background-color: rgba(0, 0, 0, 0.15);
+  color: currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  opacity: 0.9;
+  transition: all 0.2s ease-out;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  pointer-events: auto; /* Ensure close button is clickable */
+  z-index: 10001; /* Ensure close button is above the toast */
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.25);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.toast-close:active {
+  background-color: rgba(0, 0, 0, 0.35);
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Mobile styles */
+@media (max-width: 640px) {
+  .toast {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    margin-bottom: 0.375rem;
+  }
+  
+  .toast-title {
+    font-size: 0.875rem;
+    margin-bottom: 0.125rem;
+  }
+  
+  .toast-description {
+    font-size: 0.8125rem;
+  }
+
+  .toast-viewport {
+    padding: 0.5rem;
+  }
+
+  .toast-close {
+    opacity: 1;
+    right: 0.5rem;
+    width: 2rem;
+    height: 2rem;
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Swipe animation */
+@keyframes slideOut {
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.toast.slide-out {
+  animation: slideOut 0.2s ease-out forwards;
+}
+
+/* Auto-dismiss animation */
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.toast.auto-dismiss {
+  animation: fadeOut 0.3s ease-out forwards;
+  animation-delay: 2s; /* Reduced from default 3s to 2s */
+} 

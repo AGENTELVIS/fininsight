@@ -1,4 +1,4 @@
-import { INewAccount, INewBudget, INewData, INewUser } from '@/types';
+import { INewAccount, INewBudget, INewData, INewUser, IUpdateUser, IBudget, ITransaction, TransactionsResponse } from '@/types';
 import { 
     createAccount, 
     createBudget, 
@@ -6,15 +6,20 @@ import {
     createUserAccount, 
     deleteAccount, 
     deleteTransaction, 
+    getCurrentUser, 
     getRecentTransactions, 
     getUserAccounts, 
     getUserBudgets, 
+    getUserById, 
     getUserTransactions, 
+    searchTransactions, 
     signInAccount, 
     signOutAccount, 
     updateAccount, 
     updateAccountBalance, 
-    updateTransaction
+    updateTransaction,
+    updateUser,
+    getAllTransactions,
 } from '../appwrite/api';
 
 import { 
@@ -42,6 +47,36 @@ export const useSignInAccount = () =>{
     })
 }
 
+export const useGetCurrentUser = () => {
+    return useQuery({
+      queryKey: [Query_Keys.GET_CURRENT_USER],
+      queryFn: getCurrentUser,
+    });
+  };
+
+export const useGetUserById = (userId: string) => {
+    return useQuery({
+      queryKey: [Query_Keys.GET_USER_BY_ID, userId],
+      queryFn: () => getUserById(userId),
+      enabled: !!userId,
+    });
+};
+
+export const useUpdateUser = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: (user: IUpdateUser) => updateUser(user),
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({
+          queryKey: [Query_Keys.GET_CURRENT_USER],
+        });
+        queryClient.invalidateQueries({
+          queryKey: [Query_Keys.GET_USER_BY_ID, data?.$id],
+        });
+      },
+    });
+  };
+
 export const useSignOutAccount = () =>{
     return useMutation({
         mutationFn: signOutAccount
@@ -57,7 +92,10 @@ export const useCreateTransaction = () => {
             console.log("Transaction created successfully");
             queryClient.invalidateQueries({
                 queryKey: [Query_Keys.GET_RECENT_TRANSACTIONS]
-            }); // Refresh transaction data
+            });
+            queryClient.invalidateQueries({
+                queryKey: [Query_Keys.GET_USER_BUDGETS]
+            });
         },
     });
 };
@@ -191,9 +229,29 @@ export const useCreateBudget = () => {
 };
 
 export const useGetUserBudgets = (userId?: string) => {
-    return useQuery({
-      queryKey: [Query_Keys.GET_USER_BUDGETS, userId],
-      queryFn: () => getUserBudgets(userId),
-      enabled: !!userId,
+    return useQuery<{ documents: IBudget[] }>({
+        queryKey: [Query_Keys.GET_USER_BUDGETS, userId],
+        queryFn: () => getUserBudgets(userId),
+        enabled: !!userId,
+        refetchInterval: 1000,
+        refetchIntervalInBackground: true,
+        staleTime: 0,
     });
 };
+
+export const useSearchTransactions = (userId: string, searchTerm: string, timeFilter: 'all' | 'week' | 'month' | 'year' = 'all') => {
+  return useQuery({
+    queryKey: [Query_Keys.SEARCH_TRANSACTIONS, userId, searchTerm, timeFilter],
+    queryFn: () => searchTransactions(userId, searchTerm, timeFilter),
+    enabled: !!userId,
+  });
+};
+
+export const useGetAllTransactions = (userId?: string) => {
+  return useQuery<TransactionsResponse>({
+    queryKey: [Query_Keys.GET_USER_TRANSACTIONS, userId, 'all'],
+    queryFn: () => getAllTransactions(userId),
+    enabled: !!userId,
+  });
+};
+  

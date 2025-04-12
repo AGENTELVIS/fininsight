@@ -1,11 +1,22 @@
-export type IUser = {
+export type IUpdateUser = {
+    userId: string;
+    name: string;
+    username: string;
+    email: string;
+    imageId: string;
+    imageUrl: URL | string;
+    file: File[];
+  };
+  
+  export type IUser = {
     id: string;
     name: string;
     username: string;
     email: string;
-    imageUrl: string;
-    bio: string;
+    imageId?: string;
+    imageUrl?: string;
   };
+  
   
   export type INewUser = {
     name: string;
@@ -61,4 +72,44 @@ export type ExtractedData = {
   total?: string;
   date?: string;
   category?: string;
+};
+
+export type IBudget = {
+  $id: string;
+  $collectionId: string;
+  $databaseId: string;
+  $createdAt: string;
+  $updatedAt: string;
+  $permissions: string[];
+  creator: string;
+  category: string;
+  amount: number;
+  spent: number;
+  period: string;
+  periodNumber: number;
+  startDate: string;
+  endDate: string;
+};
+
+export type ITransaction = {
+  $id: string;
+  $collectionId: string;
+  $databaseId: string;
+  $createdAt: string;
+  $updatedAt: string;
+  $permissions: string[];
+  creator: string;
+  amount: number;
+  category: string;
+  note?: string;
+  date: string;
+  type: string;
+  account: string;
+  imageId?: string;
+  imageUrl?: string;
+};
+
+export type TransactionsResponse = {
+  documents: ITransaction[];
+  total: number;
 };

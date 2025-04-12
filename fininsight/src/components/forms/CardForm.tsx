@@ -16,7 +16,7 @@ import DatePicker from "../shared/DatePicker";
 import CategoryDropdown from "./CategoryDropdown";
 import { CardValidation } from "@/lib/validation";
 import { Models } from "appwrite";
-import { useCreateTransaction } from "@/lib/react-query/queriesAndMutations";
+import { useCreateTransaction, useGetUserAccounts } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -39,10 +39,11 @@ import { X } from "lucide-react";
 type CardFormProps = {
   transaction?: Models.Document;
   onClose?: () => void;
+  isOpen?: boolean;
 };
 
-const CardForm = ({ transaction, onClose }: CardFormProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const CardForm = ({ transaction, onClose, isOpen = false }: CardFormProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(isOpen);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { mutateAsync: createTransaction, isLoading: isLoadingCreate } = useCreateTransaction();
   const { user } = useUserContext();
@@ -50,6 +51,11 @@ const CardForm = ({ transaction, onClose }: CardFormProps) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: accounts } = useGetUserAccounts(user?.id);
+
+  useEffect(() => {
+    setIsModalOpen(isOpen);
+  }, [isOpen]);
 
   const form = useForm<z.infer<typeof CardValidation>>({
     resolver: zodResolver(CardValidation),
@@ -90,6 +96,20 @@ const CardForm = ({ transaction, onClose }: CardFormProps) => {
     setIsSubmitting(true);
   
     try {
+      // Check account balance for expenses
+      if (values.type === "expense") {
+        const selectedAccount = accounts?.documents.find(acc => acc.$id === values.account);
+        if (selectedAccount && selectedAccount.amount < values.amount) {
+          toast({
+            title: "Insufficient Balance",
+            description: `The selected account has insufficient balance. Current balance: ${selectedAccount.amount}`,
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       console.log("Submitting form with values:", values);
       
       let imageId = values.imageId;
@@ -144,17 +164,20 @@ const CardForm = ({ transaction, onClose }: CardFormProps) => {
 
   return (
     <>
-      <div className="relative">
+      <div className="relative h-full">
         <ReceiptDropzone />
         <Button 
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-40 bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-md"
+          className="absolute bottom-0 left-0 right-0 w-full rounded-b-xl bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-md h-10"
           onClick={() => setIsModalOpen(true)}
         >
           Add Transaction
         </Button>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Dialog open={isModalOpen} onOpenChange={(open) => {
+        setIsModalOpen(open);
+        if (!open && onClose) onClose();
+      }}>
         <DialogContent className="max-w-md p-0 z-[100]" aria-describedby="transaction-form-description">
           <DialogTitle></DialogTitle>
           <DialogDescription id="transaction-form-description">

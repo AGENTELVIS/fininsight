@@ -7,7 +7,8 @@ import LineChart from './LineChart';
 import { TimeRange } from '@/lib/appwrite/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUserContext } from '@/context/AuthContext';
-import { getCurrentMonthTransactions, groupTransactionsByDay, groupTransactionsByMonth } from '@/lib/appwrite/api';
+import { groupTransactionsByDay, groupTransactionsByMonth } from '@/lib/appwrite/api';
+import { useGetAllTransactions } from '@/lib/react-query/queriesAndMutations';
 
 const FinancialOverview = () => {
   const { user } = useUserContext();
@@ -17,44 +18,43 @@ const FinancialOverview = () => {
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState<{ day: string; income: number; expense: number }[]>([]);
 
+  const { data: transactions, isLoading: isTransactionsLoading } = useGetAllTransactions(user?.id);
+
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user?.id) return;
-      setLoading(true);
-      try {
-        const transactions = await getCurrentMonthTransactions(user.id);
-        const formattedData = transactions.documents.map(tx => ({
-          amount: tx.amount,
-          date: tx.date,
-          type: tx.type,
-        }));
+    if (!transactions?.documents) return;
+    
+    setLoading(true);
+    try {
+      const formattedData = transactions.documents.map(tx => ({
+        amount: tx.amount,
+        date: tx.date,
+        type: tx.type,
+      }));
 
-        const groupedData = view === 'daily' 
-          ? groupTransactionsByDay(formattedData)
-          : groupTransactionsByMonth(formattedData);
+      const groupedData = view === 'daily' 
+        ? groupTransactionsByDay(formattedData)
+        : groupTransactionsByMonth(formattedData);
 
-        setChartData(groupedData);
-      } catch (error) {
-        console.error('Error fetching transaction data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user?.id, view]);
+      setChartData(groupedData);
+    } catch (error) {
+      console.error('Error processing transaction data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [transactions, view]);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Financial Overview</h2>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <span>View by:</span>
           {(['week', 'month', 'year'] as TimeRange[]).map((r) => (
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`px-3 py-1 rounded ${
-                range === r ? 'bg-blue-600 text-white' : 'bg-gray-200'
+              className={`px-2 py-1 rounded-md transition-colors ${
+                range === r ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {r.charAt(0).toUpperCase() + r.slice(1)}
@@ -82,17 +82,17 @@ const FinancialOverview = () => {
         </Card>
       </div>
 
-      {/* Transaction Charts */}
       <Card className="p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Transaction Overview</h2>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>View by:</span>
             {['daily', 'monthly'].map((v) => (
               <button
                 key={v}
                 onClick={() => setView(v as 'daily' | 'monthly')}
-                className={`px-4 py-2 rounded ${
-                  view === v ? 'bg-blue-600 text-white' : 'bg-gray-200'
+                className={`px-2 py-1 rounded-md transition-colors ${
+                  view === v ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 {v.charAt(0).toUpperCase() + v.slice(1)}
@@ -101,7 +101,7 @@ const FinancialOverview = () => {
           </div>
         </div>
 
-        {loading ? (
+        {isTransactionsLoading || loading ? (
           <div className="space-y-4">
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-8 w-full" />
