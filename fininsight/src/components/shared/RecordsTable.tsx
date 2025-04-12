@@ -4,7 +4,7 @@ import { useUserContext } from "@/context/AuthContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Models } from "appwrite";
-import { Trash, Edit } from "lucide-react";
+import { Trash, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import CardForm from "@/components/forms/CardForm";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,6 +32,8 @@ import {
 type RecordsTableProps = {
   transactions: Models.Document[];
 };
+
+const ITEMS_PER_PAGE = 7;
 
 const getCategoryIcon = (category: string, type: string) => {
   const iconSize = "h-5 w-5";
@@ -88,9 +90,14 @@ const RecordsTable = ({ transactions }: RecordsTableProps) => {
   const { user } = useUserContext();
   const { mutateAsync: deleteTransaction } = useDeleteTransaction();
   const queryClient = useQueryClient();
-
+  const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<Models.Document | null>(null);
+
+  const totalPages = Math.ceil(transactions.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentTransactions = transactions.slice(startIndex, endIndex);
 
   const handleDeleteTransaction = async (transactionId: string) => {
     await deleteTransaction(transactionId);
@@ -107,71 +114,108 @@ const RecordsTable = ({ transactions }: RecordsTableProps) => {
     setIsModalOpen(false);
   };
 
-  return (
-    <div className="w-full overflow-x-auto">
-      <Table className="w-full">
-        <TableHeader>
-          <TableRow className="bg-gray-100">
-            <TableHead className="w-[15%]">Date</TableHead>
-            <TableHead className="w-[25%]">Category</TableHead>
-            <TableHead className="w-[30%]">Description</TableHead>
-            <TableHead className="w-[20%]">Amount</TableHead>
-            <TableHead className="w-[10%] text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
 
-        <TableBody>
-          {transactions.map((transaction) => (
-            <TableRow key={transaction.$id} className="hover:bg-gray-50">
-              <TableCell className="px-6 py-4">
-                {format(new Date(transaction.date), 'MMM dd, yyyy')}
-              </TableCell>
-              <TableCell className="px-6 py-4">
-                <div className="flex items-center gap-2">
-                  {getCategoryIcon(transaction.category, transaction.type)}
-                  <span className="font-medium text-gray-900">
-                    {transaction.category}
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell className="px-6 py-4">
-                {transaction.note || '-'}
-              </TableCell>
-              <TableCell className={`px-6 py-4 font-medium ${
-                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {formatCurrency(transaction.amount)}
-              </TableCell>
-              <TableCell className="px-6 py-4 text-right">
-                <div className="flex justify-end gap-2">
-                  <Button 
-                    onClick={() => handleEdit(transaction)} 
-                    variant="ghost" 
-                    size="icon"
-                    className="h-8 w-8 hover:bg-gray-100"
-                  >
-                    <Edit className="h-4 w-4 text-gray-600" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    className="h-8 w-8 hover:bg-red-50"
-                    onClick={() => {
-                      if (window.confirm("Are you sure you want to delete this transaction?")) {
-                        handleDeleteTransaction(transaction.$id);
-                      }
-                    }}
-                  >
-                    <Trash className="h-4 w-4 text-red-600" />
-                  </Button>
-                </div>
-              </TableCell>
+  return (
+    <div className="w-full">
+      <div className="w-full overflow-x-auto">
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow className="bg-gray-100">
+              <TableHead className="w-[15%]">Date</TableHead>
+              <TableHead className="w-[25%]">Category</TableHead>
+              <TableHead className="w-[30%]">Description</TableHead>
+              <TableHead className="w-[20%]">Amount</TableHead>
+              <TableHead className="w-[10%] text-right">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+
+          <TableBody>
+            {currentTransactions.map((transaction) => (
+              <TableRow key={transaction.$id} className="hover:bg-gray-50">
+                <TableCell className="px-6 py-4">
+                  {format(new Date(transaction.date), 'MMM dd, yyyy')}
+                </TableCell>
+                <TableCell className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    {getCategoryIcon(transaction.category, transaction.type)}
+                    <span className="font-medium text-gray-900">
+                      {transaction.category}
+                    </span>
+                  </div>
+                </TableCell>
+                <TableCell className="px-6 py-4">
+                  {transaction.note || '-'}
+                </TableCell>
+                <TableCell className={`px-6 py-4 font-medium ${
+                  transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {formatCurrency(transaction.amount)}
+                </TableCell>
+                <TableCell className="px-6 py-4 text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      onClick={() => handleEdit(transaction)} 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-8 w-8 hover:bg-gray-100"
+                    >
+                      <Edit className="h-4 w-4 text-gray-600" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-8 w-8 hover:bg-red-50"
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to delete this transaction?")) {
+                          handleDeleteTransaction(transaction.$id);
+                        }
+                      }}
+                    >
+                      <Trash className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {transactions.length === 0 && <p className="text-gray-500 text-center mt-4">No transactions found.</p>}
+
+      {transactions.length > 0 && (
+        <div className="flex items-center justify-between mt-4 px-4">
+          <div className="text-sm text-gray-500">
+            Showing {startIndex + 1} to {Math.min(endIndex, transactions.length)} of {transactions.length} transactions
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-gray-500">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-md p-0 z-[100] border-0">

@@ -14,26 +14,30 @@ import IntervalDropdown from "../shared/IntervalDropdown";
 import CategoryDropdown from "@/components/forms/CategoryDropdown";
 import { BudgetValidation } from "@/lib/validation";
 import { useUserContext } from "@/context/AuthContext";
-import { useCreateBudget, useGetUserBudgets } from "@/lib/react-query/queriesAndMutations";
+import { useCreateBudget, useGetUserBudgets, useUpdateBudget } from "@/lib/react-query/queriesAndMutations";
 import { Query_Keys } from "@/lib/react-query/queryKeys";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import Modal from "@/_root/pages/UpdateTransactions";
+import { Models } from "appwrite";
 
 type BudgetModalProps = {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  budget?: Models.Document;
 };
 
-const BudgetModal = ({ isOpen, setIsOpen }: BudgetModalProps) => {
+const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
   const { user } = useUserContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { mutateAsync: createBudget, isLoading: isLoadingCreate } = useCreateBudget();
+  const { mutateAsync: updateBudget, isLoading: isLoadingUpdate } = useUpdateBudget();
   const { data: existingBudgets } = useGetUserBudgets(user?.id);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof BudgetValidation>>({
     resolver: zodResolver(BudgetValidation),
@@ -46,56 +50,105 @@ const BudgetModal = ({ isOpen, setIsOpen }: BudgetModalProps) => {
     },
   });
 
+  // Update form values when budget changes
   useEffect(() => {
-    if (!isOpen) form.reset();
+    if (budget) {
+      form.reset({
+        amount: Number(budget.amount),
+        category: budget.category,
+        period: budget.period,
+        periodNumber: Number(budget.periodNumber),
+        startDate: new Date(budget.startDate),
+      });
+    } else {
+      form.reset({
+        amount: 0,
+        category: "",
+        period: "Monthly",
+        periodNumber: 1,
+        startDate: new Date(),
+      });
+    }
+  }, [budget]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset();
+      setIsSubmitting(false);
+    }
   }, [isOpen]);
 
   const onSubmit = async (values: z.infer<typeof BudgetValidation>) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     try {
-      // Check if user already has 3 budgets
-      const currentBudgetsCount = existingBudgets?.documents?.length ?? 0;
-      if (currentBudgetsCount >= 3) {
-        toast({
-          title: "Budget Limit Reached",
-          description: "You can only have 3 budgets at a time. Please delete an existing budget to create a new one.",
-          variant: "destructive",
-        });
-        setIsOpen(false);
-        return;
+      // Check if user already has 3 budgets when creating new budget
+      if (!budget) {
+        const currentBudgetsCount = existingBudgets?.documents?.length ?? 0;
+        if (currentBudgetsCount >= 3) {
+          toast({
+            title: "Budget Limit Reached",
+            description: "You can only have 3 budgets at a time. Please delete an existing budget to create a new one.",
+            variant: "destructive",
+          });
+          setIsOpen(false);
+          return;
+        }
       }
 
-      const newBudget = await createBudget({
-        ...values,
-        userID: user.id,
-      });
-
-      if (!newBudget) {
-        toast({
-          title: "Failed to create budget. Please try again.",
+      if (budget) {
+        // Update existing budget
+        await updateBudget({
+          budgetId: budget.$id,
+          updatedData: {
+            ...values,
+            creator: user.id,
+          },
         });
-        return;
+        toast({
+          title: "Budget updated successfully!",
+        });
+      } else {
+        // Create new budget
+        const newBudget = await createBudget({
+          ...values,
+          creator: user.id,
+        });
+
+        if (!newBudget) {
+          toast({
+            title: "Failed to create budget. Please try again.",
+          });
+          return;
+        }
+
+        toast({
+          title: "Budget created successfully!",
+        });
       }
 
-      toast({
-        title: "Budget created successfully!",
-      });
       queryClient.invalidateQueries([Query_Keys.GET_USER_BUDGETS]);
       setIsOpen(false);
     } catch (error) {
       console.error(error);
       toast({
-        title: "Failed to create budget. Please try again.",
+        title: "Failed to save budget. Please try again.",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const currentBudgetsCount = existingBudgets?.documents?.length ?? 0;
-  const isBudgetLimitReached = currentBudgetsCount >= 3;
+  const isBudgetLimitReached = !budget && currentBudgetsCount >= 3;
 
   return (
     <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
       <div className="p-6">
-        <h2 className="text-lg font-semibold mb-4">Create Budget</h2>
+        <h2 className="text-lg font-semibold mb-4">{budget ? 'Edit Budget' : 'Create Budget'}</h2>
         {isBudgetLimitReached && (
           <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
             <p className="text-sm">You have reached the maximum limit of 3 budgets. Please delete an existing budget to create a new one.</p>
@@ -176,9 +229,9 @@ const BudgetModal = ({ isOpen, setIsOpen }: BudgetModalProps) => {
               </Button>
               <Button 
                 type="submit" 
-                disabled={isLoadingCreate || isBudgetLimitReached}
+                disabled={isSubmitting || isBudgetLimitReached}
               >
-                {isLoadingCreate ? "Creating..." : "Save Budget"}
+                {isSubmitting ? "Saving..." : budget ? "Update Budget" : "Save Budget"}
               </Button>
             </div>
           </form>

@@ -593,7 +593,7 @@ export async function createBudget(budget: INewBudget) {
       appwriteConfig.budgetCollectionId,
       ID.unique(),
       {
-        creator: budget.userID,
+        creator: budget.creator,
         category: budget.category,
         amount: budget.amount,
         period: budget.period,
@@ -1044,6 +1044,58 @@ export async function searchTransactions(userId: string, search: string, timeFil
   } catch (error) {
     console.error("Error searching transactions:", error);
     return { documents: [] };
+  }
+}
+
+export async function updateBudget(budgetId: string, updatedData: Partial<INewBudget>) {
+  try {
+    // Get the existing budget
+    const existingBudget = await databases.getDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.budgetCollectionId,
+      budgetId
+    );
+
+    if (!existingBudget) throw new Error("Budget not found");
+
+    // Calculate new end date if period or periodNumber changed
+    let endDate = existingBudget.endDate;
+    if (updatedData.period || updatedData.periodNumber) {
+      const startDate = updatedData.startDate ? new Date(updatedData.startDate) : new Date(existingBudget.startDate);
+      const period = updatedData.period || existingBudget.period;
+      const periodNumber = updatedData.periodNumber || existingBudget.periodNumber;
+      endDate = calculateEndDate(startDate, period, periodNumber).toISOString();
+    }
+
+    // Update the budget with new data
+    const updatedBudget = await databases.updateDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.budgetCollectionId,
+      budgetId,
+      {
+        ...updatedData,
+        endDate,
+        // Preserve the spent amount
+        spent: existingBudget.spent,
+      }
+    );
+
+    return updatedBudget;
+  } catch (error) {
+    console.error("Error updating budget:", error);
+    throw error;
+  }
+}
+
+export async function deleteBudget(budgetId: string) {
+  try {
+    await databases.deleteDocument(
+      appwriteConfig.databaseId,
+      appwriteConfig.budgetCollectionId,
+      budgetId
+    );
+  } catch (error) {
+    console.error("Error deleting budget:", error);
   }
 }
 

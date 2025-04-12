@@ -59,7 +59,7 @@ export type INewAccount = {
 }
 
 export type INewBudget = {
-  userID: string;
+  creator: string;
   amount: number;
   category: string;
   period: string;

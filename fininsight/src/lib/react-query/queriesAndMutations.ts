@@ -20,6 +20,8 @@ import {
     updateTransaction,
     updateUser,
     getAllTransactions,
+    updateBudget,
+    deleteBudget,
 } from '../appwrite/api';
 
 import { 
@@ -252,6 +254,29 @@ export const useGetAllTransactions = (userId?: string) => {
     queryKey: [Query_Keys.GET_USER_TRANSACTIONS, userId, 'all'],
     queryFn: () => getAllTransactions(userId),
     enabled: !!userId,
+  });
+};
+
+export const useUpdateBudget = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ budgetId, updatedData }: { budgetId: string; updatedData: Partial<INewBudget> }) =>
+      updateBudget(budgetId, updatedData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [Query_Keys.GET_USER_BUDGETS] });
+    },
+  });
+};
+
+export const useDeleteBudget = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (budgetId: string) => deleteBudget(budgetId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [Query_Keys.GET_USER_BUDGETS] });
+    },
   });
 };
   

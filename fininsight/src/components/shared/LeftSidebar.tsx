@@ -88,7 +88,7 @@ const LeftSidebar = () => {
       <Button
         variant="ghost"
         className="flex gap-2 items-center text-red-500 p-5 m-4"
-        onClick={() => signOut()}
+        onClick={handleSignOut}
       >
         <img src="vite.svg" alt="logout" className="w-5 h-5" />
         <p className="text-sm">Logout</p>
