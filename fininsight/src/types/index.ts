@@ -56,6 +56,7 @@ export type INewAccount = {
   userId: string;
   name: string;
   amount: number;
+  isDefault?: boolean;
 }
 
 export type INewBudget = {

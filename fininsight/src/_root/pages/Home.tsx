@@ -25,9 +25,7 @@ const Home = () => {
       </div>
 
       {/* Bottom Section: Accounts */}
-      <div className="bg-white rounded-2xl shadow-md p-4">
-        <CreateAccount />
-      </div>
+      <CreateAccount />
     </div>
   );
 };

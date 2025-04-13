@@ -8,6 +8,10 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { FileDown, FileText } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Records = () => {
   const { user } = useUserContext();
@@ -17,14 +21,100 @@ const Records = () => {
   const { data: budgets, isLoading: isBudgetsLoading } = useGetUserBudgets(user?.id);
   const [activeTab, setActiveTab] = useState('transactions');
 
+  const exportToCSV = () => {
+    const headers = ['Date', 'Category', 'Description', 'Amount', 'Type'];
+    const csvContent = [
+      headers.join(','),
+      ...(transactions?.documents || []).map(tx => [
+        new Date(tx.date).toISOString().split('T')[0],
+        tx.category,
+        `"${(tx.note || '').replace(/"/g, '""')}"`,
+        tx.amount,
+        tx.type
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `transactions_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.text('Transaction History', 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Generated on ${new Date().toISOString().split('T')[0]}`, 14, 22);
+
+    // Prepare data for the table
+    const tableData = (transactions?.documents || []).map(tx => [
+      new Date(tx.date).toISOString().split('T')[0],
+      tx.category,
+      tx.note || '-',
+      tx.amount.toString(),
+      tx.type
+    ]);
+
+    // Add the table using autoTable
+    autoTable(doc, {
+      head: [['Date', 'Category', 'Description', 'Amount', 'Type']],
+      body: tableData,
+      startY: 30,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [59, 130, 246],
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      columnStyles: {
+        3: { cellWidth: 'auto' }
+      }
+    });
+
+    // Save the PDF
+    doc.save(`transactions_${new Date().toISOString().split('T')[0]}.pdf`);
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Records</h2>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportToCSV}
+            className="flex items-center gap-2 bg-white hover:bg-gray-50"
+          >
+            <FileText className="h-4 w-4" />
+            <span>Export CSV</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={exportToPDF}
+            className="flex items-center gap-2 bg-white hover:bg-gray-50"
+          >
+            <FileDown className="h-4 w-4" />
+            <span>Export PDF</span>
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="transactions" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-sm grid-cols-2">
+        <TabsList className="w-full grid grid-cols-2">
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="budgets">Budgets</TabsTrigger>
         </TabsList>

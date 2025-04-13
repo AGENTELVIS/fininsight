@@ -35,6 +35,7 @@ export const CardValidation = z.object({
 export const AccountValidation = z.object({
       name: z.string().min(1,"Name is required"),
       amount: z.coerce.number().positive().min(1).max(9999999),
+      isDefault: z.boolean().optional(),
 })
 
 export const BudgetValidation = z.object({

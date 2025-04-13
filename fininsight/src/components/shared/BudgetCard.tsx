@@ -23,6 +23,7 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import Modal from "@/_root/pages/UpdateTransactions";
 import { Models } from "appwrite";
+import { calculateEndDate } from "@/lib/appwrite/api";
 
 type BudgetModalProps = {
   isOpen: boolean;
@@ -78,6 +79,38 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
     }
   }, [isOpen]);
 
+  const validateBudgetDates = (startDate: Date | undefined, period: string, periodNumber: number) => {
+    if (!startDate) {
+      toast({
+        title: "Invalid Start Date",
+        description: "Please select a start date for your budget.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today
+
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = calculateEndDate(start, period, periodNumber);
+    end.setHours(0, 0, 0, 0);
+
+    // Check if today falls within the budget period
+    if (today < start || today > end) {
+      toast({
+        title: "Invalid Budget Period",
+        description: "Budget must include today's date. Please adjust the start date or period.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+
   const onSubmit = async (values: z.infer<typeof BudgetValidation>) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -95,6 +128,27 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
           setIsOpen(false);
           return;
         }
+
+        // Check if a budget already exists for this category
+        const existingCategoryBudget = existingBudgets?.documents?.find(
+          (b) => b.category === values.category
+        );
+
+        if (existingCategoryBudget) {
+          toast({
+            title: "Category Already Budgeted",
+            description: `You already have a budget for ${values.category}. Please choose a different category or edit the existing budget.`,
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Validate budget dates
+      if (!validateBudgetDates(values.startDate, values.period, values.periodNumber)) {
+        setIsSubmitting(false);
+        return;
       }
 
       if (budget) {

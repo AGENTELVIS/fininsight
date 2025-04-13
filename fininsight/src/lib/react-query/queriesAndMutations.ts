@@ -165,6 +165,7 @@ type UpdateAccountParams = {
     updatedData: {
         name: string;
         amount: number;
+        isDefault?: boolean;
     };
 };
 

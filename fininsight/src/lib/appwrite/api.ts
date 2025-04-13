@@ -245,9 +245,11 @@ export async function updateBudgetSpent(userId: string, category: string, amount
         if (type === "expense") {
           newSpent = currentSpent + amount;
         } else if (type === "income") {
-          // If it's an income transaction, we don't update the spent amount
-          continue;
+          newSpent = currentSpent - amount;
         }
+        
+        // Ensure spent amount doesn't go below 0
+        newSpent = Math.max(0, newSpent);
         
         await databases.updateDocument(
           appwriteConfig.databaseId,
@@ -360,20 +362,22 @@ export async function getRecentTransactions() {
 
 export async function createAccount(account: INewAccount){
   try {
-    const newAccount = databases.createDocument(
+    const newAccount = await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.accountsCollectionId,
       ID.unique(),
-    {
-      creator:account.userId,
-      name: account.name,
-      amount: account.amount
-    }
+      {
+        creator: account.userId,
+        name: account.name,
+        amount: account.amount,
+        isDefault: account.isDefault || false
+      }
     );
 
     return newAccount;
   } catch (error) {
-    console.log(error)
+    console.error("Error creating account:", error);
+    throw error;
   }
 } 
 
@@ -494,65 +498,108 @@ export async function updateTransaction(transactionId: string, updatedData: Part
 
     if (!existingTransaction) throw new Error("Transaction not found");
 
-    const oldAccountId = existingTransaction.account;
-    const newAccountId = updatedData.account ?? oldAccountId;
+    // Extract old and new values
+    const oldValues = {
+      accountId: existingTransaction.account,
+      amount: Number(existingTransaction.amount),
+      type: existingTransaction.type,
+      category: existingTransaction.category
+    };
 
-    const oldAmount = Number(existingTransaction.amount);
-    const newAmount = Number(updatedData.amount ?? oldAmount);
+    const newValues = {
+      accountId: updatedData.account ?? oldValues.accountId,
+      amount: Number(updatedData.amount ?? oldValues.amount),
+      type: updatedData.type ?? oldValues.type,
+      category: updatedData.category ?? oldValues.category
+    };
 
-    const oldType = existingTransaction.type;
-    const newType = updatedData.type ?? oldType;
+    // Determine what changed
+    const changes = {
+      account: oldValues.accountId !== newValues.accountId,
+      type: oldValues.type !== newValues.type,
+      amount: oldValues.amount !== newValues.amount,
+      category: oldValues.category !== newValues.category
+    };
 
-    const isAccountChanged = oldAccountId !== newAccountId;
-    const isTypeChanged = oldType !== newType;
-    const isAmountChanged = oldAmount !== newAmount;
-
-    // 🔁 Case 1: Account changed → revert old + apply new
-    if (isAccountChanged) {
-      await updateAccountBalance(oldAccountId, oldAmount, oldType === "income" ? "expense" : "income");
-      await updateAccountBalance(newAccountId, newAmount, newType);
-    }
-
-    // 🔁 Case 2: Type changed (same account)
-    if (isTypeChanged && oldAmount === newAmount) {
+    // Handle account balance changes
+    if (changes.account) {
+      // Revert old account balance
+      await updateAccountBalance(
+        oldValues.accountId,
+        oldValues.amount,
+        oldValues.type === "income" ? "expense" : "income"
+      );
+      // Apply new account balance
+      await updateAccountBalance(
+        newValues.accountId,
+        newValues.amount,
+        newValues.type
+      );
+    } else if (changes.type && oldValues.amount === newValues.amount) {
       // Net out the old type
-      await updateAccountBalance(oldAccountId, oldAmount * 2, newType);
-    } else if (isTypeChanged) {
-      // Handle net effect of type change with different amounts
-      await updateAccountBalance(oldAccountId, oldAmount, oldType === "income" ? "expense" : "income");
-      await updateAccountBalance(oldAccountId, newAmount, newType);
+      await updateAccountBalance(
+        oldValues.accountId,
+        oldValues.amount * 2,
+        newValues.type
+      );
+    } else if (changes.type) {
+      // Handle type change with different amounts
+      await updateAccountBalance(
+        oldValues.accountId,
+        oldValues.amount,
+        oldValues.type === "income" ? "expense" : "income"
+      );
+      await updateAccountBalance(
+        oldValues.accountId,
+        newValues.amount,
+        newValues.type
+      );
+    } else if (changes.amount) {
+      // Handle amount change
+      const diff = newValues.amount - oldValues.amount;
+      const effectiveType = diff > 0 ? newValues.type : (newValues.type === "income" ? "expense" : "income");
+      await updateAccountBalance(
+        oldValues.accountId,
+        Math.abs(diff),
+        effectiveType
+      );
     }
-    
 
-    // 🔁 Case 3: Amount changed (same account + same type)
-    else if (isAmountChanged) {
-      const diff = newAmount - oldAmount;
-      const effectiveType = diff > 0 ? newType : (newType === "income" ? "expense" : "income");
-      await updateAccountBalance(oldAccountId, Math.abs(diff), effectiveType);
+    // Update budget spent amount if category or amount changed
+    if (changes.category || changes.amount || changes.type) {
+      // Always revert the old budget update first if it was an expense
+      if (oldValues.type === "expense") {
+        await updateBudgetSpent(
+          existingTransaction.creator,
+          oldValues.category,
+          oldValues.amount,
+          "income" // Revert by subtracting the old amount
+        );
+      }
+      
+      // Only apply new budget update if it's an expense
+      if (newValues.type === "expense") {
+        await updateBudgetSpent(
+          existingTransaction.creator,
+          newValues.category,
+          newValues.amount,
+          "expense" // Apply new expense
+        );
+      }
     }
 
-    // ✅ Finally update the transaction
+    // Update the transaction
     const updatedTransaction = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
       transactionId,
       updatedData
     );
-    console.log("Updating Transaction:", {
-      oldAccountId,
-      newAccountId,
-      oldAmount,
-      newAmount,
-      oldType,
-      newType,
-      isAccountChanged,
-      isTypeChanged,
-      isAmountChanged
-    });
     
     return updatedTransaction;
   } catch (error) {
     console.error("Error updating transaction:", error);
+    throw error;
   }
 }
 
@@ -568,7 +615,7 @@ export async function deleteTransaction(transactionId: string) {
   }
 }
 
-function calculateEndDate(startDate: Date, period: string, periodNumber: number): Date {
+export function calculateEndDate(startDate: Date, period: string, periodNumber: number): Date {
   switch (period) {
     case "daily":
       return addDays(startDate, periodNumber);

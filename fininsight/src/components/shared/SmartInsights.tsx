@@ -4,6 +4,7 @@ import { useGetUserTransactions, useGetUserAccounts, useGetUserBudgets } from '@
 import { useUserContext } from '@/context/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { subMonths } from 'date-fns';
 
 interface CachedData {
   oneLiner: string;
@@ -91,6 +92,28 @@ const SmartInsight = () => {
       if (!transactions?.documents || !accounts?.documents || !budgets?.documents) return;
 
       try {
+        // Filter transactions for the last 3 months
+        const threeMonthsAgo = subMonths(new Date(), 3);
+        const recentTransactions = transactions.documents.filter(tx => 
+          new Date(tx.date) >= threeMonthsAgo && tx.type === 'expense'
+        );
+
+        // Only generate insights if there are at least 10 expense transactions in the last 3 months
+        if (recentTransactions.length < 10) {
+          setOneLiner('💡 Add more transactions to get personalized insights!');
+          setFullInsight('We need at least 10 expense transactions from the last 3 months to generate meaningful insights. Keep tracking your expenses!');
+          setLoading(false);
+          return;
+        }
+
+        // Get transactions from previous 3 months for comparison
+        const sixMonthsAgo = subMonths(new Date(), 6);
+        const previousTransactions = transactions.documents.filter(tx => 
+          new Date(tx.date) >= sixMonthsAgo && 
+          new Date(tx.date) < threeMonthsAgo && 
+          tx.type === 'expense'
+        );
+
         const currentHash = calculateDataHash({ transactions, accounts, budgets });
         const cachedInsight = localStorage.getItem('smartInsights') 
           ? JSON.parse(localStorage.getItem('smartInsights')!) as CachedData 
@@ -112,13 +135,14 @@ const SmartInsight = () => {
 
             1. **One-Liner Insight (labeled "OneLiner:")**  
             Give a short, emoji-friendly takeaway (max 1 sentence).  
-            Format like this: 💡 You’ve gone ₹300 over your food budget this week.
+            Format like this: 💡 You've gone ₹300 over your food budget this week.
 
             2. **Expanded Insight (labeled "FullInsight:")**  
             A short (2–3 sentence) summary with a friendly, encouraging tone.
-            - Acknowledge the user’s efforts using the app.
-            - Highlight one or two specific trends or concerns.
-            - End with a practical suggestion (e.g., adjusting budgets, reviewing categories).
+            - Compare spending patterns between current and previous 3 months
+            - Highlight significant changes in category-wise spending
+            - Suggest budget adjustments if needed
+            - End with a practical suggestion
 
             🚫 Do NOT mention anything about:
             - Missing or inaccurate data
@@ -129,7 +153,8 @@ const SmartInsight = () => {
             Only focus on budget use, spending trends, and helpful actions.
 
             User Data:
-            Transactions: ${JSON.stringify(transactions.documents)}
+            Recent Transactions (Last 3 months): ${JSON.stringify(recentTransactions)}
+            Previous Transactions (3-6 months ago): ${JSON.stringify(previousTransactions)}
             Accounts: ${JSON.stringify(accounts.documents)}
             Budgets: ${JSON.stringify(budgets.documents)}
 

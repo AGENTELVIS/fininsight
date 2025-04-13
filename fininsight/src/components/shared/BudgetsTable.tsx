@@ -8,6 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Query_Keys } from '@/lib/react-query/queryKeys';
 import { useState } from 'react';
 import BudgetModal from './BudgetCard';
+import { format } from 'date-fns';
 
 type BudgetsTableProps = {
   budgets: Models.Document[];
@@ -63,23 +64,30 @@ const BudgetsTable = ({ budgets }: BudgetsTableProps) => {
             
             return (
               <tr key={budget.$id} className="bg-white border-b hover:bg-gray-50">
-                <td className="px-4 py-4 font-medium text-gray-900">
-                  {budget.category}
-                </td>
                 <td className="px-4 py-4">
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-900 text-sm md:text-base">
+                      {budget.category}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {format(new Date(budget.startDate), 'MMM d')} - {format(new Date(budget.endDate), 'MMM d')}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-4 py-4 text-sm md:text-base">
                   {formatCurrency(budget.amount)}
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-4 py-4 text-sm md:text-base">
                   {formatCurrency(budget.spent)}
                 </td>
-                <td className="px-4 py-4">
+                <td className="px-4 py-4 text-sm md:text-base">
                   {formatCurrency(remaining)}
                 </td>
                 <td className="px-4 py-4">
                   <div className="flex items-center gap-2">
                     <Progress 
                       value={percentage} 
-                      className="h-2 w-20 md:w-24"
+                      className="h-2 w-16 md:w-24"
                       indicatorColor={getBudgetColor(percentage)}
                     />
                     <span className="text-xs text-gray-500 whitespace-nowrap">

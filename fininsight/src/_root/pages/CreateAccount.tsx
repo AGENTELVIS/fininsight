@@ -4,8 +4,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AccountDrawer from "@/components/shared/AccountDrawer";
 import { useUserContext } from "@/context/AuthContext";
 import { useGetUserAccounts } from "@/lib/react-query/queriesAndMutations";
-import { formatCurrency } from "@/lib/utils";
 import { Models } from "appwrite";
+import { useUpdateAccount } from "@/lib/react-query/queriesAndMutations";
+import { useQueryClient } from "@tanstack/react-query";
+import { Query_Keys } from "@/lib/react-query/queryKeys";
+import { useToast } from "@/hooks/use-toast";
+
+import AccountInfoCard from "@/components/shared/AccountInfoCard";
 
 const CreateAccount = () => {
     const [openDrawer, setOpenDrawer] = useState(false);
@@ -21,6 +26,36 @@ const CreateAccount = () => {
     const handleAdd = () => {
         setSelectedAccount(null);
         setOpenDrawer(true);
+    };
+
+    const queryClient = useQueryClient();
+    const { mutateAsync: updateAccount } = useUpdateAccount();
+    const { toast } = useToast();
+
+    const handleSetDefault = async (accountId: string) => {
+    try {
+        const currentAccounts = accounts?.documents || [];
+
+        await Promise.all(
+        currentAccounts.map((acc) =>
+            updateAccount({
+            accountId: acc.$id,
+            updatedData: {
+                name: acc.name,
+                amount: acc.amount,
+                isDefault: acc.$id === accountId,
+            },
+            })
+        )
+        );
+
+        await queryClient.invalidateQueries([Query_Keys.GET_USER_ACCOUNTS]);
+
+        toast({ title: "Default account updated!" });
+    } catch (err) {
+        console.error("Failed to update default account", err);
+        toast({ title: "Error updating default account", variant: "destructive" });
+    }
     };
 
     return (
@@ -53,28 +88,12 @@ const CreateAccount = () => {
                     </div>
                 ) : (
                     accounts?.documents.map((account) => (
-                        <div key={account.$id} className="flex items-center justify-between p-2 hover:bg-slate-100 rounded-lg">
-                            <div className="flex items-center space-x-3">
-                                <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center">
-                                    {account.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium">{account.name}</h3>
-                                    <p className="text-xs text-muted-foreground">Account</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <p className="text-sm font-medium">{formatCurrency(account.amount)}</p>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleEdit(account)}
-                                    className="h-8 w-8 p-0"
-                                >
-                                    ✎
-                                </Button>
-                            </div>
-                        </div>
+                        <AccountInfoCard 
+                            key={account.$id} 
+                            account={account} 
+                            onEdit={handleEdit}
+                            onSetDefault={() => handleSetDefault(account.$id)}
+                        />
                     ))
                 )}
             </div>
