@@ -22,7 +22,6 @@ const App = () => {
         <Route element={<RootLayout/>} >
           <Route index element={<Home/>} />
           <Route path='/create-transactions' element={<CreateTransactions/>} />
-          <Route path='/update-transactions' element={<UpdateTransactions />} />
           <Route path='/records' element={<Records />} />
           <Route path='/profile/:id/*' element={<Profile />} />
         </Route>

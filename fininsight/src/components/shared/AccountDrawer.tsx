@@ -168,10 +168,10 @@ const AccountDrawer = ({ account, isOpen, setIsOpen }: AccountDrawerProps) => {
                     </Button>
                     {account && (
                         <DeleteDialog
-                            itemId={account.$id}
+                            accountId={account.$id}
                             onDelete={handleDelete}
                             title="Delete Account"
-                            description="Are you sure you want to delete this account? This action cannot be undone."
+                            description="Are you sure you want to delete this account? This will delete all transactions related to this Account."
                         />
                     )}
                 </div>

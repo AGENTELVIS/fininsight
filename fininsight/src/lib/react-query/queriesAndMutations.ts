@@ -7,7 +7,6 @@ import {
     deleteAccount, 
     deleteTransaction, 
     getCurrentUser, 
-    getRecentTransactions, 
     getUserAccounts, 
     getUserBudgets, 
     getUserById, 
@@ -93,7 +92,7 @@ export const useCreateTransaction = () => {
         onSuccess: () => {
             console.log("Transaction created successfully");
             queryClient.invalidateQueries({
-                queryKey: [Query_Keys.GET_RECENT_TRANSACTIONS]
+                queryKey: [Query_Keys.GET_USER_TRANSACTIONS]
             });
             queryClient.invalidateQueries({
                 queryKey: [Query_Keys.GET_USER_BUDGETS]
@@ -109,13 +108,6 @@ export const useGetUserTransactions = (userId?: string) => {
       enabled: !!userId,
     });
   };
-  
-export const useGetRecentTransactions = () => {
-    return useQuery({
-        queryKey: [Query_Keys.GET_RECENT_TRANSACTIONS],
-        queryFn: getRecentTransactions,
-    })
-}
 
  export const useCreateAccount = () => {
     const queryClient = useQueryClient();

@@ -339,22 +339,6 @@ export async function getUserTransactions(userId?: string) {
   }
 }
 
-export async function getRecentTransactions() {
-  try {
-    const transactions = await databases.listDocuments(
-      appwriteConfig.databaseId,
-      appwriteConfig.transactionsCollectionId,
-      [Query.orderDesc("$createdAt"), Query.limit(20)]
-    );
-
-    if (!transactions) throw Error;
-
-    return transactions;
-  } catch (error) {
-    console.log(error);
-  }
-} 
-
 export async function createAccount(account: INewAccount){
   try {
     const newAccount = await databases.createDocument(
@@ -470,8 +454,7 @@ export async function deleteAccount(accountId: string) {
         transaction.$id
       );
     }
-
-    
+ 
     await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.accountsCollectionId,
