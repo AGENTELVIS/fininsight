@@ -10,6 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast"
 import { useSignInAccount } from '@/lib/react-query/queriesAndMutations.ts';
 import { useUserContext } from '@/context/AuthContext.tsx';
+import { Loader2 } from 'lucide-react';
 
 
 
@@ -95,7 +96,7 @@ const SigninForm = () => {
           <Button type="submit" className="shad-button_primary">
             {isLoading || isUserLoading ? (
               <div className="flex-center gap-2">
-                <Loader /> Loading...
+                <Loader /> 
               </div>
             ) : (
               "Log in"
