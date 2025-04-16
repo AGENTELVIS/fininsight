@@ -13,18 +13,16 @@ const Home = () => {
       <div>
         <SmartInsight/>
       </div>
-      {/* Top Section: Budget + Add Transaction */}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <CreateBudget />
         <CardForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </div>
-
-      {/* Graph Section */}
+  
       <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
         <Graphs />
       </div>
 
-      {/* Bottom Section: Accounts */}
       <CreateAccount />
     </div>
   );

@@ -159,7 +159,7 @@ export const useUpdateAccountBalance = () => {
     );
 };
 
-// ✅ Update Account
+
 type UpdateAccountParams = {
     accountId: string;
     updatedData: {
@@ -182,7 +182,6 @@ export const useUpdateAccount = () => {
 };
 
 
-// ✅ Delete Account
 export const useDeleteAccount = () => {
     const queryClient = useQueryClient();
 

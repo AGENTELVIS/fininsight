@@ -88,7 +88,7 @@ const CreateBudget = () => {
   const { data: budgetData, isLoading } = useGetUserBudgets(user?.id);
   const [budgetsWithSpending, setBudgetsWithSpending] = useState<BudgetWithSpending[]>([]);
   const [notifiedBudgets, setNotifiedBudgets] = useState<Set<string>>(() => {
-    // Initialize from localStorage
+    
     const stored = localStorage.getItem('notifiedBudgets');
     return new Set(stored ? JSON.parse(stored) : []);
   });
@@ -114,7 +114,7 @@ const CreateBudget = () => {
         const spent = Number(budget.spent || 0);
         const percentage = Math.min((spent / budget.amount) * 100, 100);
       
-        // Check if budget has reached 80% and hasn't been notified yet
+        
         if (percentage >= 80 && !notifiedBudgets.has(budget.$id)) {
           toast({
             title: "Budget Alert",
@@ -123,7 +123,7 @@ const CreateBudget = () => {
           });
           const newNotifiedBudgets = new Set(notifiedBudgets).add(budget.$id);
           setNotifiedBudgets(newNotifiedBudgets);
-          // Store in localStorage
+          
           localStorage.setItem('notifiedBudgets', JSON.stringify([...newNotifiedBudgets]));
         }
       
@@ -154,7 +154,7 @@ const CreateBudget = () => {
       
       <div className="max-h-[300px] overflow-y-auto space-y-3">
         {isLoading ? (
-          // Loading skeletons
+          
           Array(3).fill(0).map((_, index) => (
             <div key={index} className="space-y-2">
               <div className="flex justify-between">

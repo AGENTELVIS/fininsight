@@ -41,7 +41,7 @@ const Topbar = () => {
     <section className='sticky top-0 z-50 md:hidden bg-white w-full border-b'>
       <div className='flex justify-between items-center py-3 px-4'>
         <Link to="/" className='flex gap-3 items-center'>
-          <img src='default-monochrome.svg' alt='logo' width={32} height={32}/>
+          <img src='default-monochrome.svg' className='' alt='logo' width={100} height={60}/>
         </Link>
 
         <div className='flex items-center gap-4'>

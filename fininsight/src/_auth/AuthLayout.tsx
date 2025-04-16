@@ -26,7 +26,7 @@ const AuthLayout = () => {
           <div className="hidden lg:block relative w-1/2 h-screen overflow-hidden bg-gradient-to-br from-blue-600/5 to-blue-800/5">
             <div className="h-full flex flex-col items-center justify-center gap-6 p-8">
               <div className="w-full max-w-md space-y-6">
-                {/* Income Card */}
+  
                 <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 backdrop-blur-sm rounded-2xl p-6 border border-green-500/20 shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <div className="flex items-center gap-4">
                     <div className="bg-green-500/20 p-3 rounded-xl">
@@ -39,7 +39,7 @@ const AuthLayout = () => {
                   </div>
                 </div>
 
-                {/* Expense Card */}
+                
                 <div className="bg-gradient-to-br from-red-500/10 to-red-600/10 backdrop-blur-sm rounded-2xl p-6 border border-red-500/20 shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <div className="flex items-center gap-4">
                     <div className="bg-red-500/20 p-3 rounded-xl">

@@ -12,7 +12,7 @@ import { Query_Keys } from "@/lib/react-query/queryKeys";
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/utils';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from "jspdf-autotable";
 import { 
   ShoppingBag, 
   Utensils, 
@@ -120,71 +120,6 @@ const RecordsTable = ({ transactions }: RecordsTableProps) => {
     setCurrentPage(newPage);
   };
 
-  const exportToCSV = () => {
-    const headers = ['Date', 'Category', 'Description', 'Amount', 'Type'];
-    const csvContent = [
-      headers.join(','),
-      ...transactions.map(tx => [
-        format(new Date(tx.date), 'yyyy-MM-dd'),
-        tx.category,
-        `"${(tx.note || '').replace(/"/g, '""')}"`,
-        tx.amount,
-        tx.type
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `transactions_${format(new Date(), 'yyyy-MM-dd')}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-    
-    // Add title
-    doc.setFontSize(16);
-    doc.text('Transaction History', 14, 15);
-    doc.setFontSize(10);
-    doc.text(`Generated on ${format(new Date(), 'yyyy-MM-dd')}`, 14, 22);
-
-    // Prepare data for the table
-    const tableData = transactions.map(tx => [
-      format(new Date(tx.date), 'yyyy-MM-dd'),
-      tx.category,
-      tx.note || '-',
-      tx.amount.toString(),
-      tx.type
-    ]);
-
-    // Add the table using autoTable
-    (doc as any).autoTable({
-      head: [['Date', 'Category', 'Description', 'Amount', 'Type']],
-      body: tableData,
-      startY: 30,
-      theme: 'grid',
-      styles: {
-        fontSize: 8,
-        cellPadding: 2,
-      },
-      headStyles: {
-        fillColor: [59, 130, 246],
-        textColor: 255,
-        fontStyle: 'bold'
-      },
-      columnStyles: {
-        3: { cellWidth: 'auto' }
-      }
-    });
-
-    // Save the PDF
-    doc.save(`transactions_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
-  };
 
   return (
     <div className="w-full">

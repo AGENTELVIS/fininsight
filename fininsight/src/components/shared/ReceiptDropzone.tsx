@@ -46,7 +46,6 @@ const ReceiptDropzone: React.FC = () => {
       return;
     }
 
-    // Create preview URL
     const previewUrl = URL.createObjectURL(file);
     setImagePreview(previewUrl);
     setSelectedFile(file);
@@ -62,7 +61,6 @@ const ReceiptDropzone: React.FC = () => {
   const handleConfirm = async (accountId: string, saveImage: boolean) => {
     if (!user || !extractedData) return;
 
-    // Validate required fields
     if (!extractedData.total || !extractedData.date || !extractedData.category) {
       toast({
         title: "Incomplete receipt data",
@@ -72,7 +70,6 @@ const ReceiptDropzone: React.FC = () => {
       return;
     }
 
-    // Check account balance for expenses
     const selectedAccount = accounts?.documents.find(acc => acc.$id === accountId);
     const amount = parseFloat(extractedData.total);
     if (selectedAccount && selectedAccount.amount < amount) {
@@ -89,13 +86,12 @@ const ReceiptDropzone: React.FC = () => {
       let imageUrl = '';
 
       if (saveImage && selectedFile) {
-        // Upload image to storage
+
         const { fileId, fileUrl } = await uploadFile(selectedFile);
         imageId = fileId;
-        imageUrl = fileUrl.toString(); // Ensure it's a string URL
+        imageUrl = fileUrl.toString(); 
       }
 
-      // Convert amount to integer with proper rounding
       const decimalPart = amount % 1;
       const roundedAmount = decimalPart >= 0.5 ? Math.ceil(amount) : Math.floor(amount);
 
@@ -108,7 +104,7 @@ const ReceiptDropzone: React.FC = () => {
         type: 'expense',
         account: accountId,
         imageId: imageId || undefined,
-        ...(imageUrl ? { imageUrl } : {}), // Only include imageUrl if it exists
+        ...(imageUrl ? { imageUrl } : {}), 
       };
 
       await createTransaction(transactionData);

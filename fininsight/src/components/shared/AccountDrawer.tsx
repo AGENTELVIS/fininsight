@@ -74,7 +74,7 @@ const AccountDrawer = ({ account, isOpen, setIsOpen }: AccountDrawerProps) => {
         try {
             let response;
             if (account) {
-                // If an account exists, update it
+               
                 response = await updateExistingAccount({
                     accountId: account.$id,
                     updatedData: {
@@ -84,7 +84,7 @@ const AccountDrawer = ({ account, isOpen, setIsOpen }: AccountDrawerProps) => {
                     },
                 });
             } else {
-                // Otherwise, create a new account
+                
                 response = await createNewAccount({
                     userId: user.id,
                     name: values.name,
