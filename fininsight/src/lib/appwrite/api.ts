@@ -34,7 +34,6 @@ export async function createUserAccount(user: INewUser) {
   }
 }
 
-// ============================== SAVE USER TO DB
 export async function saveUserToDB(user: {
   accountId: string;
   email: string;
@@ -56,7 +55,6 @@ export async function saveUserToDB(user: {
   }
 }
 
-// ============================== SIGN IN
 export async function signInAccount(user: { email: string; password: string }) {
   try {
     const session = await account.createEmailPasswordSession(user.email, user.password);
@@ -72,7 +70,6 @@ export async function signInAccount(user: { email: string; password: string }) {
   }
 }
 
-// ============================== GET ACCOUNT
 export async function getAccount() {
   try {
     const currentAccount = await account.get();
@@ -83,7 +80,7 @@ export async function getAccount() {
   }
 }
 
-// ============================== GET USER
+
 export async function getCurrentUser() {
   try {
     let currentAccount = await getAccount();
@@ -91,7 +88,6 @@ export async function getCurrentUser() {
     if (!currentAccount) {
       console.warn("User not logged in, attempting session refresh...");
 
-      // Attempt to refresh session
       try {
         await account.getSession("current");
         currentAccount = await getAccount();
@@ -101,7 +97,6 @@ export async function getCurrentUser() {
       }
     }
 
-    // Ensure `currentAccount` is defined before accessing `$id`
     if (!currentAccount) {
       console.warn("Still no user account after session refresh.");
       return null;
@@ -117,7 +112,7 @@ export async function getCurrentUser() {
       return currentUser.documents[0];
     }
 
-    return null; // No user found
+    return null; 
   } catch (error) {
     console.error("Error fetching current user:", error);
     return null;
@@ -159,7 +154,7 @@ export async function deleteFile(fileId: string) {
     console.log(error);
   }
 }
-// ============================== UPDATE USER
+
 export async function updateUser(user: IUpdateUser) {
   const hasFileToUpdate = user.file.length > 0;
   try {
@@ -226,7 +221,7 @@ export function getFileView(fileId: string) {
 
 export async function updateBudgetSpent(userId: string, category: string, amount: number, type: string) {
   try {
-    // Get all budgets for this category
+    
     const budgets = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.budgetCollectionId,
@@ -236,7 +231,7 @@ export async function updateBudgetSpent(userId: string, category: string, amount
       ]
     );
 
-    // Update each budget's spent amount
+    
     for (const budget of budgets.documents) {
       try {
         const currentSpent = Number(budget.spent || 0);
@@ -248,7 +243,7 @@ export async function updateBudgetSpent(userId: string, category: string, amount
           newSpent = currentSpent - amount;
         }
         
-        // Ensure spent amount doesn't go below 0
+        
         newSpent = Math.max(0, newSpent);
         
         await databases.updateDocument(
@@ -259,7 +254,7 @@ export async function updateBudgetSpent(userId: string, category: string, amount
         );
       } catch (err) {
         console.warn(`Failed to update budget ${budget.$id}:`, err);
-        // Continue with other budgets even if one fails
+        
         continue;
       }
     }
@@ -300,7 +295,7 @@ export async function createTransaction(transaction: INewData) {
       throw new Error("Failed to create transaction");
     }
 
-    // Update account balance
+    
     await updateAccountBalance(transaction.account, transaction.amount, transaction.type);
     
     try {
@@ -323,7 +318,7 @@ export async function getUserTransactions(userId?: string) {
 
   console.log("Fetching transactions for userId:", userId);
 
-  // Ensure user is logged in
+  
   const user = await getCurrentUser();
   if (!user) {
     console.warn("User not authenticated, skipping transaction fetch.");
@@ -343,22 +338,6 @@ export async function getUserTransactions(userId?: string) {
     return { documents: [] };
   }
 }
-
-export async function getRecentTransactions() {
-  try {
-    const transactions = await databases.listDocuments(
-      appwriteConfig.databaseId,
-      appwriteConfig.transactionsCollectionId,
-      [Query.orderDesc("$createdAt"), Query.limit(20)]
-    );
-
-    if (!transactions) throw Error;
-
-    return transactions;
-  } catch (error) {
-    console.log(error);
-  }
-} 
 
 export async function createAccount(account: INewAccount){
   try {
@@ -391,10 +370,10 @@ export async function getUserAccounts(userId?: string) {
       [Query.equal("creator", userId)]
     );
 
-    return userAccounts ?? { documents: [] }; // Ensure it's never `undefined`
+    return userAccounts ?? { documents: [] }; 
   } catch (error) {
     console.log(error);
-    return { documents: [] }; // Prevent infinite loading
+    return { documents: [] }; 
   }
 }
 
@@ -405,7 +384,7 @@ export async function updateAccountBalance(accountId: string, amount: number, ty
       throw new Error("Invalid account ID");
     }
 
-    // Fetch the existing account
+    
     const account = await databases.getDocument(
       appwriteConfig.databaseId,
       appwriteConfig.accountsCollectionId,
@@ -414,7 +393,7 @@ export async function updateAccountBalance(accountId: string, amount: number, ty
 
     if (!account) throw new Error("Account not found");
 
-    // Convert amount to a number to prevent string concatenation
+    
     let currentBalance = Number(account.amount);
     let transactionAmount = Number(amount);
 
@@ -427,7 +406,7 @@ export async function updateAccountBalance(accountId: string, amount: number, ty
 
     console.log(`Updating Account ID: ${accountId}, Current Balance: ${currentBalance}, Transaction Amount: ${transactionAmount}, Type: ${type}`);
 
-    // Update account balance
+    
     await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.accountsCollectionId,
@@ -460,14 +439,14 @@ export async function updateAccount(accountId: string, updatedData: Partial<INew
 
 export async function deleteAccount(accountId: string) {
   try {
-    // Fetch transactions linked to this account
+    
     const transactions = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
       [Query.equal("account", accountId)]
     );
 
-    // Delete each transaction
+    
     for (const transaction of transactions.documents) {
       await databases.deleteDocument(
         appwriteConfig.databaseId,
@@ -475,8 +454,7 @@ export async function deleteAccount(accountId: string) {
         transaction.$id
       );
     }
-
-    // Delete the account itself
+ 
     await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.accountsCollectionId,
@@ -489,7 +467,7 @@ export async function deleteAccount(accountId: string) {
 
 export async function updateTransaction(transactionId: string, updatedData: Partial<INewData>) {
   try {
-    // Get the existing transaction
+    
     const existingTransaction = await databases.getDocument(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
@@ -498,7 +476,7 @@ export async function updateTransaction(transactionId: string, updatedData: Part
 
     if (!existingTransaction) throw new Error("Transaction not found");
 
-    // Extract old and new values
+    
     const oldValues = {
       accountId: existingTransaction.account,
       amount: Number(existingTransaction.amount),
@@ -513,7 +491,7 @@ export async function updateTransaction(transactionId: string, updatedData: Part
       category: updatedData.category ?? oldValues.category
     };
 
-    // Determine what changed
+    
     const changes = {
       account: oldValues.accountId !== newValues.accountId,
       type: oldValues.type !== newValues.type,
@@ -521,29 +499,29 @@ export async function updateTransaction(transactionId: string, updatedData: Part
       category: oldValues.category !== newValues.category
     };
 
-    // Handle account balance changes
+    
     if (changes.account) {
-      // Revert old account balance
+      
       await updateAccountBalance(
         oldValues.accountId,
         oldValues.amount,
         oldValues.type === "income" ? "expense" : "income"
       );
-      // Apply new account balance
+      
       await updateAccountBalance(
         newValues.accountId,
         newValues.amount,
         newValues.type
       );
     } else if (changes.type && oldValues.amount === newValues.amount) {
-      // Net out the old type
+      
       await updateAccountBalance(
         oldValues.accountId,
         oldValues.amount * 2,
         newValues.type
       );
     } else if (changes.type) {
-      // Handle type change with different amounts
+      
       await updateAccountBalance(
         oldValues.accountId,
         oldValues.amount,
@@ -555,7 +533,7 @@ export async function updateTransaction(transactionId: string, updatedData: Part
         newValues.type
       );
     } else if (changes.amount) {
-      // Handle amount change
+     
       const diff = newValues.amount - oldValues.amount;
       const effectiveType = diff > 0 ? newValues.type : (newValues.type === "income" ? "expense" : "income");
       await updateAccountBalance(
@@ -565,30 +543,30 @@ export async function updateTransaction(transactionId: string, updatedData: Part
       );
     }
 
-    // Update budget spent amount if category or amount changed
+    
     if (changes.category || changes.amount || changes.type) {
-      // Always revert the old budget update first if it was an expense
+      
       if (oldValues.type === "expense") {
         await updateBudgetSpent(
           existingTransaction.creator,
           oldValues.category,
           oldValues.amount,
-          "income" // Revert by subtracting the old amount
+          "income" 
         );
       }
       
-      // Only apply new budget update if it's an expense
+      
       if (newValues.type === "expense") {
         await updateBudgetSpent(
           existingTransaction.creator,
           newValues.category,
           newValues.amount,
-          "expense" // Apply new expense
+          "expense" 
         );
       }
     }
 
-    // Update the transaction
+
     const updatedTransaction = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
@@ -632,7 +610,7 @@ export function calculateEndDate(startDate: Date, period: string, periodNumber: 
 
 export async function createBudget(budget: INewBudget) {
   try {
-    const startDate = budget.startDate ?? new Date(); // default to now if undefined
+    const startDate = budget.startDate ?? new Date(); 
     const endDate = calculateEndDate(startDate, budget.period, budget.periodNumber);
 
     const newBudget = await databases.createDocument(
@@ -647,7 +625,7 @@ export async function createBudget(budget: INewBudget) {
         periodNumber: budget.periodNumber,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        spent: 0, // Initialize spent to 0
+        spent: 0, 
       }
     );
 
@@ -671,7 +649,6 @@ export async function getUserBudgets(userId?: string): Promise<{ documents: IBud
       ]
     );
 
-    // Ensure each budget has a spent field and matches the IBudget type
     const budgetsWithSpent = userBudgets.documents.map(budget => ({
       ...budget,
       spent: Number(budget.spent || 0),
@@ -717,7 +694,6 @@ export async function getCategoryWiseSpending(userId: string, start: Date, end: 
     })
   );
 
-  // Filter out categories with zero spending
   return results.filter(item => item.total > 0);
 }
 
@@ -748,7 +724,6 @@ export async function getAllTransactions(userId?: string): Promise<TransactionsR
 export function groupTransactionsByDay(transactions: { amount: number; date: string, type: string}[] = []) {
   const grouped: Record<string, { income: number; expense: number }> = {};
 
-  // If no transactions, return empty data for all days
   if (!transactions || transactions.length === 0) {
     return Array.from({ length: 31 }, (_, i) => {
       const day = (i + 1).toString();
@@ -765,9 +740,9 @@ export function groupTransactionsByDay(transactions: { amount: number; date: str
       if (!tx || !tx.date || !tx.type || !tx.amount) return;
       
       const date = new Date(tx.date);
-      if (isNaN(date.getTime())) return; // Skip invalid dates
+      if (isNaN(date.getTime())) return; 
       
-      const day = date.getDate().toString(); // 1 to 31
+      const day = date.getDate().toString(); 
       const amount = Number(tx.amount) || 0;
 
       if (!grouped[day]) {
@@ -784,7 +759,6 @@ export function groupTransactionsByDay(transactions: { amount: number; date: str
     }
   });
 
-  // Prepare array for Recharts
   return Array.from({ length: 31 }, (_, i) => {
     const day = (i + 1).toString();
     return {
@@ -820,16 +794,11 @@ export function groupTransactionsByWeek(transactions: { amount: number; date: st
 }
 
 export function groupTransactionsByMonth(transactions: { amount: number; date: string, type: string}[] = []) {
-  // Initialize an array of all months with their short names
+
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
-  // Create a map to store the data for each month
   const monthData = new Map(months.map(month => [month, { income: 0, expense: 0 }]));
-
-  // Get current year
   const currentYear = new Date().getFullYear();
-
-  // If no transactions, return empty data for all months
+  
   if (!transactions || transactions.length === 0) {
     return months.map(month => ({
       day: month,
@@ -838,13 +807,12 @@ export function groupTransactionsByMonth(transactions: { amount: number; date: s
     }));
   }
 
-  // Process each transaction
   transactions.forEach(tx => {
     try {
       if (!tx || !tx.date || !tx.type || !tx.amount) return;
       
       const date = new Date(tx.date);
-      if (isNaN(date.getTime())) return; // Skip invalid dates
+      if (isNaN(date.getTime())) return; 
       
       if (date.getFullYear() === currentYear) {
         const monthIndex = date.getMonth();
@@ -867,7 +835,6 @@ export function groupTransactionsByMonth(transactions: { amount: number; date: s
     }
   });
 
-  // Convert the map to the required array format
   return months.map(month => ({
     day: month,
     income: monthData.get(month)?.income || 0,
@@ -875,57 +842,6 @@ export function groupTransactionsByMonth(transactions: { amount: number; date: s
   }));
 }
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY); // use your environment variable
-
-export async function scanReceipt(file: File) {
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    const arrayBuffer = await file.arrayBuffer();
-    const base64 = btoa(
-      new Uint8Array(arrayBuffer).reduce(
-        (data, byte) => data + String.fromCharCode(byte),
-        ""
-      )
-    );
-
-    const prompt = `
-      You are an expert in analyzing receipt data.
-      
-      Extract the following from this receipt image:
-      {
-        "amount": number,
-        "date": "ISO date string",
-        "description": "string",
-        "merchantName": "string",
-        "category": "string"
-      }
-      If not a receipt, return {}.
-    `;
-
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          data: base64,
-          mimeType: file.type,
-        },
-      },
-      prompt,
-    ]);
-
-    const response = await result.response;
-    const text = response.text();
-    const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
-
-    const data = JSON.parse(cleanedText);
-    return data;
-  } catch (err) {
-    console.error("Failed to scan receipt:", err);
-    throw err;
-  }
-}
 
 export type TimeRange = 'week' | 'month' | 'year';
 
@@ -1036,7 +952,6 @@ export async function searchTransactions(userId: string, search: string, timeFil
   try {
     const queries: any[] = [Query.equal("creator", userId)];
 
-    // Add date filter based on timeFilter
     if (timeFilter !== 'all') {
       const now = new Date();
       const startDate = new Date();
@@ -1057,7 +972,6 @@ export async function searchTransactions(userId: string, search: string, timeFil
       queries.push(Query.lessThanEqual("date", now.toISOString()));
     }
 
-    // If search term is empty, return filtered transactions
     if (!search.trim()) {
       return await databases.listDocuments(
         appwriteConfig.databaseId,
@@ -1066,17 +980,14 @@ export async function searchTransactions(userId: string, search: string, timeFil
       );
     }
 
-    // Convert search term to lowercase for case-insensitive matching
     const searchTerm = search.toLowerCase();
 
-    // Add contains queries for string fields
     const orFilters = [
       Query.contains("category", searchTerm),
       Query.contains("type", searchTerm),
       Query.contains("note", searchTerm)
     ];
 
-    // Add amount search if the search term is a number
     if (!isNaN(Number(searchTerm))) {
       orFilters.push(Query.equal("amount", Number(searchTerm)));
     }
@@ -1096,7 +1007,7 @@ export async function searchTransactions(userId: string, search: string, timeFil
 
 export async function updateBudget(budgetId: string, updatedData: Partial<INewBudget>) {
   try {
-    // Get the existing budget
+    
     const existingBudget = await databases.getDocument(
       appwriteConfig.databaseId,
       appwriteConfig.budgetCollectionId,
@@ -1105,7 +1016,6 @@ export async function updateBudget(budgetId: string, updatedData: Partial<INewBu
 
     if (!existingBudget) throw new Error("Budget not found");
 
-    // Calculate new end date if period or periodNumber changed
     let endDate = existingBudget.endDate;
     if (updatedData.period || updatedData.periodNumber) {
       const startDate = updatedData.startDate ? new Date(updatedData.startDate) : new Date(existingBudget.startDate);
@@ -1114,7 +1024,6 @@ export async function updateBudget(budgetId: string, updatedData: Partial<INewBu
       endDate = calculateEndDate(startDate, period, periodNumber).toISOString();
     }
 
-    // Update the budget with new data
     const updatedBudget = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.budgetCollectionId,
@@ -1122,7 +1031,6 @@ export async function updateBudget(budgetId: string, updatedData: Partial<INewBu
       {
         ...updatedData,
         endDate,
-        // Preserve the spent amount
         spent: existingBudget.spent,
       }
     );
@@ -1145,4 +1053,3 @@ export async function deleteBudget(budgetId: string) {
     console.error("Error deleting budget:", error);
   }
 }
-

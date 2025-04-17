@@ -5,7 +5,7 @@ import { useSignOutAccount } from '@/lib/react-query/queriesAndMutations.ts';
 import { useUserContext, INITIAL_USER  } from '@/context/AuthContext.tsx';
 import { sidebarLinks } from '@/constants/index.ts';
 import { INavLink } from '@/types';
-import { Home, Wallet, ListChecks, FileText } from 'lucide-react';
+import { Home, Wallet, ListChecks, FileText, LogOutIcon, LogOut } from 'lucide-react';
 
 const LeftSidebar = () => {
   const { pathname } = useLocation();
@@ -39,7 +39,7 @@ const LeftSidebar = () => {
   return (
     <nav className="hidden md:flex flex-col justify-between w-72 bg-slate-50 shadow-xl rounded-xl border-2 m-3 z-10">
       <div className="flex flex-col gap-10 p-5">
-        {/* Logo */}
+        
         <Link to="/" className="flex items-center">
           <img
             src="default-monochrome.svg"
@@ -48,7 +48,7 @@ const LeftSidebar = () => {
           />
         </Link>
 
-        {/* User */}
+        
         <Link to={`/profile/${user.id}`} className="flex items-center gap-3">
           <img
             src={user.imageUrl || '/assets/react.svg'}
@@ -60,7 +60,7 @@ const LeftSidebar = () => {
           </p>
         </Link>
 
-        {/* Links */}
+        
         <ul className="flex flex-col gap-3">
           {sidebarLinks.map((link: INavLink) => {
             const isActive = pathname === link.route;
@@ -74,7 +74,7 @@ const LeftSidebar = () => {
                   to={link.route}
                   className="flex items-center gap-4 p-4"
                 >
-                  {/* Add icon here */}
+                  
                   {getIcon(link.label)}
                   <span>{link.label}</span>
                 </NavLink>
@@ -84,13 +84,13 @@ const LeftSidebar = () => {
         </ul>
       </div>
 
-      {/* Logout Button */}
+
       <Button
         variant="ghost"
         className="flex gap-2 items-center text-red-500 p-5 m-4"
         onClick={handleSignOut}
       >
-        <img src="vite.svg" alt="logout" className="w-5 h-5" />
+        <LogOut/>
         <p className="text-sm">Logout</p>
       </Button>
     </nav>

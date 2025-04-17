@@ -24,7 +24,7 @@ const AccountDropdown = ({ value, onChange }: AccountDropdownProps) => {
         ) : (
           accounts?.documents.map((account: Models.Document) => (
             <SelectItem key={account.$id} value={account.$id}>
-              {account.name} - ${account.amount}
+              {account.name} - ₹{account.amount}
             </SelectItem>
           ))
         )}

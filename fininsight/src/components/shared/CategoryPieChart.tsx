@@ -100,7 +100,7 @@ const CategoryPieChart: React.FC<CategoryPieChartProps> = ({ range, type }) => {
         </ResponsiveContainer>
       )}
 
-      {/* Center Text */}
+      
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
         <p className="text-sm text-gray-500">Total {type === 'income' ? 'Income' : 'Expense'}</p>
         <p className="text-2xl font-bold text-gray-800">{formatCurrency(totalAmount)}</p>

@@ -17,7 +17,6 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onExtract, file }) => {
   const scanReceipt = async () => {
     setLoading(true);
     try {
-      // Convert image to base64
       const arrayBuffer = await file.arrayBuffer();
       const base64 = btoa(
         new Uint8Array(arrayBuffer).reduce(
@@ -82,7 +81,7 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onExtract, file }) => {
         return;
       }
 
-      // Validate extracted data
+      
       if (!parsed || Object.keys(parsed).length === 0) {
         toast({
           title: "No receipt data found",
@@ -92,7 +91,7 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onExtract, file }) => {
         return;
       }
 
-      // Validate required fields
+      
       if (!parsed.total || !parsed.date || !parsed.category) {
         toast({
           title: "Incomplete receipt data",
@@ -119,7 +118,7 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onExtract, file }) => {
     scanReceipt();
   }, [file]);
 
-  return null; // This component doesn't render anything
+  return null; 
 };
 
 export default ReceiptScanner;

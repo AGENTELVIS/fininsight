@@ -19,7 +19,7 @@ const CreateTransactions = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-screen px-4 sm:px-6 md:px-10 py-6 bg-gray-50">
-      {/* Header + Form */}
+      
       <div className="max-w-3xl mx-auto mb-10">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">
           Add a New Transaction
@@ -29,7 +29,7 @@ const CreateTransactions = () => {
         </div>
       </div>
 
-      {/* Search and Filter */}
+  
       <div className="max-w-4xl mx-auto mb-6 flex gap-4">
         <Input
           type="text"
@@ -51,7 +51,7 @@ const CreateTransactions = () => {
         </Select>
       </div>
 
-      {/* Transaction Cards */}
+    
       <div className="max-w-7xl mx-auto grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {isLoading ? (
           <div className="col-span-full text-center">Loading...</div>

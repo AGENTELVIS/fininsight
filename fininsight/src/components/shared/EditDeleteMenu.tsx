@@ -34,7 +34,9 @@ const EditDeleteMenu = ({account}: EditDeleteMenuProps) => {
                 </MenubarItem>
                 <MenubarSeparator />
                 <MenubarTrigger className="text-destructive">
-                  <DeleteDialog accountId={account.$id} setIsOpen={setIsOpen}/>
+                  <DeleteDialog accountId={account.$id} onDelete={(id) => {
+                    setIsOpen(false);
+                  }}/>
                 </MenubarTrigger>
                 </MenubarContent>
             </MenubarMenu>

@@ -48,13 +48,11 @@ const Records = () => {
   const exportToPDF = () => {
     const doc = new jsPDF();
     
-    // Add title
     doc.setFontSize(16);
     doc.text('Transaction History', 14, 15);
     doc.setFontSize(10);
     doc.text(`Generated on ${new Date().toISOString().split('T')[0]}`, 14, 22);
 
-    // Prepare data for the table
     const tableData = (transactions?.documents || []).map(tx => [
       new Date(tx.date).toISOString().split('T')[0],
       tx.category,
@@ -63,7 +61,6 @@ const Records = () => {
       tx.type
     ]);
 
-    // Add the table using autoTable
     autoTable(doc, {
       head: [['Date', 'Category', 'Description', 'Amount', 'Type']],
       body: tableData,
@@ -83,7 +80,6 @@ const Records = () => {
       }
     });
 
-    // Save the PDF
     doc.save(`transactions_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 

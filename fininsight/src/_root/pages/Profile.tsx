@@ -21,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import ProfileUploader from "@/components/shared/ProfileUplod";
+import ProfileUploader from "@/components/shared/ProfileUploader";
 
 const UpdateProfile = () => {
   const { toast } = useToast();
@@ -38,7 +38,6 @@ const UpdateProfile = () => {
     },
   });
 
-  // Queries
   const { data: currentUser } = useGetUserById(id || "");
   const { mutateAsync: updateUser, isLoading: isLoadingUpdate } =
     useUpdateUser();
@@ -50,7 +49,7 @@ const UpdateProfile = () => {
       </div>
     );
 
-  // Handler
+
   const handleUpdate = async (value: z.infer<typeof ProfileValidation>) => {
     try {
       const updatedUser = await updateUser({

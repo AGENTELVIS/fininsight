@@ -51,7 +51,7 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
     },
   });
 
-  // Update form values when budget changes
+  
   useEffect(() => {
     if (budget) {
       form.reset({
@@ -90,14 +90,14 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
     }
 
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today
+    today.setHours(0, 0, 0, 0); 
 
     const start = new Date(startDate);
     start.setHours(0, 0, 0, 0);
     const end = calculateEndDate(start, period, periodNumber);
     end.setHours(0, 0, 0, 0);
 
-    // Check if today falls within the budget period
+    
     if (today < start || today > end) {
       toast({
         title: "Invalid Budget Period",
@@ -116,7 +116,7 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
     setIsSubmitting(true);
 
     try {
-      // Check if user already has 3 budgets when creating new budget
+     
       if (!budget) {
         const currentBudgetsCount = existingBudgets?.documents?.length ?? 0;
         if (currentBudgetsCount >= 3) {
@@ -129,7 +129,7 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
           return;
         }
 
-        // Check if a budget already exists for this category
+       
         const existingCategoryBudget = existingBudgets?.documents?.find(
           (b) => b.category === values.category
         );
@@ -145,14 +145,14 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
         }
       }
 
-      // Validate budget dates
+     
       if (!validateBudgetDates(values.startDate, values.period, values.periodNumber)) {
         setIsSubmitting(false);
         return;
       }
 
       if (budget) {
-        // Update existing budget
+        
         await updateBudget({
           budgetId: budget.$id,
           updatedData: {
@@ -164,7 +164,7 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
           title: "Budget updated successfully!",
         });
       } else {
-        // Create new budget
+       
         const newBudget = await createBudget({
           ...values,
           creator: user.id,

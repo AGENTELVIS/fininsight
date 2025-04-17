@@ -74,7 +74,7 @@ const AccountDrawer = ({ account, isOpen, setIsOpen }: AccountDrawerProps) => {
         try {
             let response;
             if (account) {
-                // If an account exists, update it
+               
                 response = await updateExistingAccount({
                     accountId: account.$id,
                     updatedData: {
@@ -84,7 +84,7 @@ const AccountDrawer = ({ account, isOpen, setIsOpen }: AccountDrawerProps) => {
                     },
                 });
             } else {
-                // Otherwise, create a new account
+                
                 response = await createNewAccount({
                     userId: user.id,
                     name: values.name,
@@ -168,10 +168,10 @@ const AccountDrawer = ({ account, isOpen, setIsOpen }: AccountDrawerProps) => {
                     </Button>
                     {account && (
                         <DeleteDialog
-                            itemId={account.$id}
+                            accountId={account.$id}
                             onDelete={handleDelete}
                             title="Delete Account"
-                            description="Are you sure you want to delete this account? This action cannot be undone."
+                            description="Are you sure you want to delete this account? This will delete all transactions related to this Account."
                         />
                     )}
                 </div>

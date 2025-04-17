@@ -72,7 +72,7 @@ const CreateAccount = () => {
             
             <div className="max-h-[300px] overflow-y-auto space-y-3">
                 {isLoading ? (
-                    // Loading skeletons
+                    
                     Array(3).fill(0).map((_, index) => (
                         <div key={index} className="flex items-center justify-between p-2">
                             <div className="flex items-center space-x-3">

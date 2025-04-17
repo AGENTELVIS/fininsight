@@ -92,13 +92,13 @@ const SmartInsight = () => {
       if (!transactions?.documents || !accounts?.documents || !budgets?.documents) return;
 
       try {
-        // Filter transactions for the last 3 months
+        
         const threeMonthsAgo = subMonths(new Date(), 3);
         const recentTransactions = transactions.documents.filter(tx => 
           new Date(tx.date) >= threeMonthsAgo && tx.type === 'expense'
         );
 
-        // Only generate insights if there are at least 10 expense transactions in the last 3 months
+       
         if (recentTransactions.length < 10) {
           setOneLiner('💡 Add more transactions to get personalized insights!');
           setFullInsight('We need at least 10 expense transactions from the last 3 months to generate meaningful insights. Keep tracking your expenses!');
@@ -106,7 +106,7 @@ const SmartInsight = () => {
           return;
         }
 
-        // Get transactions from previous 3 months for comparison
+        
         const sixMonthsAgo = subMonths(new Date(), 6);
         const previousTransactions = transactions.documents.filter(tx => 
           new Date(tx.date) >= sixMonthsAgo && 

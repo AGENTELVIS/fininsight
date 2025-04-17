@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 type DeleteDialogProps = {
-  itemId: string;
+  accountId: string;
   onDelete: (id: string) => void;
   title?: string;
   description?: string;
@@ -21,7 +21,7 @@ type DeleteDialogProps = {
 };
 
 const DeleteDialog = ({
-  itemId,
+  accountId,
   onDelete,
   title = "Are you sure?",
   description = "This action cannot be undone.",
@@ -41,7 +41,7 @@ const DeleteDialog = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => onDelete(itemId)}>
+          <AlertDialogAction onClick={() => onDelete(accountId)}>
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

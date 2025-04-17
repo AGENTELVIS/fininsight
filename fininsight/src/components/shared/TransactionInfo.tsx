@@ -92,9 +92,9 @@ const TransactionInfo = ({ transaction }: TransactionInfoProps) => {
 
   return (
     <Card className="w-full max-w-sm mx-auto p-5 relative min-h-[20px] flex flex-col justify-between shadow-md">
-      {/* Top Section: Category + Amount Vertically Centered */}
+      
       <div className="flex flex-1 flex-col justify-center gap-5">
-        {/* Row: Icon + Category | Amount */}
+       
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             {getCategoryIcon(transaction.category, transaction.type)}
@@ -103,7 +103,7 @@ const TransactionInfo = ({ transaction }: TransactionInfoProps) => {
           <p className="text-lg font-medium">₹{transaction.amount}</p>
         </div>
   
-        {/* Row: Type + Date */}
+       
         <div className="flex justify-between items-center text-sm text-gray-500 mt-1 px-1">
           <span
             className={
@@ -118,7 +118,7 @@ const TransactionInfo = ({ transaction }: TransactionInfoProps) => {
         </div>
       </div>
   
-      {/* Expand Button or Placeholder (Always Show for Alignment) */}
+     
       <div className="flex justify-center mt-4 min-h-[32px]">
         {transaction.imageId ? (
           <Button
@@ -148,11 +148,11 @@ const TransactionInfo = ({ transaction }: TransactionInfoProps) => {
             {isImageExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
         ) : (
-          <div className="w-8 h-8" /> // Empty block to maintain height
+          <div className="w-8 h-8" />
         )}
       </div>
   
-      {/* Expandable Image Section - Only Renders if Image Exists */}
+     
       {transaction.imageId && (
         <div
           id={transaction.$id}
