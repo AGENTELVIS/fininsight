@@ -131,34 +131,46 @@ const SmartInsight = () => {
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         const prompt = `
-          You are a friendly and helpful financial assistant *within a budgeting and expense tracking app* that the user is already using to manage their finances. Based on the user's financial data below, generate two structured insights:
+            You are a friendly and helpful financial assistant *within a budgeting and expense tracking app* that the user is actively using to manage their finances.
 
-            1. **One-Liner Insight (labeled "OneLiner:")**  
-            Give a short, emoji-friendly takeaway (max 1 sentence).  
-            Format like this: 💡 You've gone ₹300 over your food budget this week.
+            Based on the user’s financial data provided below, generate two structured insights:
 
-            2. **Expanded Insight (labeled "FullInsight:")**  
-            A short (2–3 sentence) summary with a friendly, encouraging tone.
-            - Compare spending patterns between current and previous 3 months
-            - Highlight significant changes in category-wise spending
-            - Suggest budget adjustments if needed
-            - End with a practical suggestion
+            ---
 
-            🚫 Do NOT mention anything about:
-            - Missing or inaccurate data
-            - Using other apps or tools
-            - Criticizing the app itself or its data
-            - Anything unrelated to financial insights
+            1. **One-Liner Insight (label it as \`OneLiner:\`)**  
+            → A short, emoji-friendly takeaway in one sentence.  
+            → Format: 💡 You’ve spent 450 more on Food this month compared to your usual spending.
 
-            Only focus on budget use, spending trends, and helpful actions.
+            ---
 
-            User Data:
-            Recent Transactions (Last 3 months): ${JSON.stringify(recentTransactions)}
-            Previous Transactions (3-6 months ago): ${JSON.stringify(previousTransactions)}
-            Accounts: ${JSON.stringify(accounts.documents)}
+            2. **Expanded Insight (label it as \`FullInsight:\`)**  
+            → A short, friendly summary (2–3 sentences) that includes:
+            - A comparison between **current spending vs the average of the previous 3 months**
+            - Clear mention of **specific categories** where spending has increased/decreased
+            - If a **budget does not exist for an overspending category**, **suggest creating one**
+            - End with **one practical and actionable tip** (e.g., meal prep, public transport, reduce impulse buys)
+
+            ---
+
+            ✅ DO:
+            - Be positive and non-judgmental in tone.
+            - Focus only on **category-wise spending**, **budgets**, and **actionable advice**.
+            
+
+            🚫 DO NOT:
+            - Mention anything about “limited data”, “insufficient history”, or “unable to analyze”
+            - Refer to other tools/apps/platforms
+            - Criticize the data or the app
+
+            ---
+
+            User Data:  
+            Recent Transactions (Last 3 months): ${JSON.stringify(recentTransactions)}  
+            Previous Transactions (3–6 months ago): ${JSON.stringify(previousTransactions)}  
+            Accounts: ${JSON.stringify(accounts.documents)}  
             Budgets: ${JSON.stringify(budgets.documents)}
+            `;
 
-        `;
 
         const result = await model.generateContent(prompt);
         const response = await result.response.text();
