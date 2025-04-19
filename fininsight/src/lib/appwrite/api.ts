@@ -61,7 +61,7 @@ export async function signInAccount(user: { email: string; password: string }) {
 
     const currentUser = await getCurrentUser();
 
-    console.log("current user:", currentUser)
+    
     if(!currentUser) throw new Error("user is not authenticated")
 
     return session;
@@ -272,8 +272,6 @@ export async function createTransaction(transaction: INewData) {
       throw new Error("Transaction date is required");
     }
 
-    console.log("Creating transaction with data:", transaction);
-
     const newTransaction = await databases.createDocument(
       appwriteConfig.databaseId,
       appwriteConfig.transactionsCollectionId,
@@ -315,9 +313,6 @@ export async function createTransaction(transaction: INewData) {
 
 export async function getUserTransactions(userId?: string) {
   if (!userId) return { documents: [] };
-
-  console.log("Fetching transactions for userId:", userId);
-
   
   const user = await getCurrentUser();
   if (!user) {
@@ -403,9 +398,6 @@ export async function updateAccountBalance(accountId: string, amount: number, ty
     } else if (type === "expense") {
       updatedBalance -= transactionAmount;
     }
-
-    console.log(`Updating Account ID: ${accountId}, Current Balance: ${currentBalance}, Transaction Amount: ${transactionAmount}, Type: ${type}`);
-
     
     await databases.updateDocument(
       appwriteConfig.databaseId,
@@ -413,8 +405,6 @@ export async function updateAccountBalance(accountId: string, amount: number, ty
       accountId,
       { amount: updatedBalance }
     );
-
-    console.log("New balance should be:", updatedBalance);
 
     return updatedBalance;
   } catch (error) {
