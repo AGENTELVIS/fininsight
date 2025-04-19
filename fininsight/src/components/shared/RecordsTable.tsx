@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useDeleteTransaction } from "@/lib/react-query/queriesAndMutations";
-import { useUserContext } from "@/context/AuthContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Models } from "appwrite";

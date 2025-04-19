@@ -19,7 +19,7 @@ const Records = () => {
   const [timeFilter, setTimeFilter] = useState<"all" | "week" | "month" | "year">("all");
   const { data: transactions, isLoading: isTransactionsLoading } = useSearchTransactions(user?.id || "", searchTerm, timeFilter);
   const { data: budgets, isLoading: isBudgetsLoading } = useGetUserBudgets(user?.id);
-  const [activeTab, setActiveTab] = useState('transactions');
+  const [,setActiveTab] = useState('transactions');
 
   const exportToCSV = () => {
     const headers = ['Date', 'Category', 'Description', 'Amount', 'Type'];

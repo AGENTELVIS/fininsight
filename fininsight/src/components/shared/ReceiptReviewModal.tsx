@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ExtractedData } from '@/types';
-import { useGetUserAccounts } from '@/lib/react-query/queriesAndMutations';
-import { useUserContext } from '@/context/AuthContext';
 import AccountDropdown from './AccountDropdown';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -66,8 +64,6 @@ const ReceiptReviewModal: React.FC<ReceiptReviewModalProps> = ({
 }) => {
   const [selectedAccount, setSelectedAccount] = useState('');
   const [saveImage, setSaveImage] = useState(false);
-  const { user } = useUserContext();
-  const { data: accounts } = useGetUserAccounts(user?.id);
 
   if (!isOpen) return null;
 

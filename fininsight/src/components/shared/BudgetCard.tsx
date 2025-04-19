@@ -35,8 +35,8 @@ const BudgetModal = ({ isOpen, setIsOpen, budget }: BudgetModalProps) => {
   const { user } = useUserContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { mutateAsync: createBudget, isLoading: isLoadingCreate } = useCreateBudget();
-  const { mutateAsync: updateBudget, isLoading: isLoadingUpdate } = useUpdateBudget();
+  const { mutateAsync: createBudget } = useCreateBudget();
+  const { mutateAsync: updateBudget } = useUpdateBudget();
   const { data: existingBudgets } = useGetUserBudgets(user?.id);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
