@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vite cache
+.vite/
+
+# TypeScript cache
+*.tsbuildinfo
+
+.env.local
+.env.*.local
