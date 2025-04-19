@@ -65,7 +65,6 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onExtract, file }) => {
       ]);
 
       const geminiText = await result.response.text();
-      console.log("Gemini Vision Result:", geminiText);
 
       let parsed;
       try {
