@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Models } from "appwrite";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ReceiptDropzone from "../shared/ReceiptDropzone";
 import TransactionModal from "../shared/TransactionModal";
 

@@ -1,7 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { Models } from 'appwrite';
 import { IUser } from '@/types';
-import { account, databases, appwriteConfig } from '@/lib/appwrite/config';
 import { useNavigate } from 'react-router-dom';
 import { getCurrentUser } from '@/lib/appwrite/api';
 

@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import './index.css';
-import { CreateTransactions, Home, Profile, Records, UpdateTransactions } from './_root/pages/Index.ts';
+import { CreateTransactions, Home, Profile, Records } from './_root/pages/Index.ts';
 import SignInform from './_auth/_forms/SignInform';
 import SignUpform from './_auth/_forms/SignUpform';
 import AuthLayout from './_auth/AuthLayout';

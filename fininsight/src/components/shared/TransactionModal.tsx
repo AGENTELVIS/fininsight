@@ -261,6 +261,7 @@ const TransactionModal = ({
                         <div className="flex items-center gap-2">
                           <FormControl>
                             <Input
+                              {...field}
                               id="receipt"
                               type="file"
                               accept="image/*"

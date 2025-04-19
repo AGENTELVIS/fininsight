@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import CashFlow from './CashFlow';
 import CategoryPieChart from './CategoryPieChart';

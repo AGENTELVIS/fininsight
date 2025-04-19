@@ -24,19 +24,6 @@ const Topbar = () => {
 
   const isProfilePage = pathname.startsWith('/profile');
 
-  const getIcon = (label: string) => {
-    switch (label) {
-      case 'Home':
-        return <Home className="w-5 h-5" />;
-      case 'Transactions':
-        return <ListChecks className="w-5 h-5" />;
-      case 'Records':
-        return <FileText className="w-5 h-5" />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <section className='sticky top-0 z-50 md:hidden bg-white w-full border-b'>
       <div className='flex justify-between items-center py-3 px-4'>

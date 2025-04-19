@@ -3,7 +3,7 @@ import { formatCurrency } from '@/lib/utils';
 import { Progress } from '@/components/ui/Progress';
 import { Button } from '@/components/ui/button';
 import { Trash, Edit } from 'lucide-react';
-import { useUpdateBudget, useDeleteBudget } from '@/lib/react-query/queriesAndMutations';
+import { useDeleteBudget } from '@/lib/react-query/queriesAndMutations';
 import { useQueryClient } from '@tanstack/react-query';
 import { Query_Keys } from '@/lib/react-query/queryKeys';
 import { useState } from 'react';
@@ -15,7 +15,6 @@ type BudgetsTableProps = {
 };
 
 const BudgetsTable = ({ budgets }: BudgetsTableProps) => {
-  const { mutateAsync: updateBudget } = useUpdateBudget();
   const { mutateAsync: deleteBudget } = useDeleteBudget();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,11 +36,6 @@ const BudgetsTable = ({ budgets }: BudgetsTableProps) => {
       await deleteBudget(budgetId);
       queryClient.invalidateQueries([Query_Keys.GET_USER_BUDGETS]);
     }
-  };
-
-  const handleClose = () => {
-    setSelectedBudget(null);
-    setIsModalOpen(false);
   };
 
   return (

@@ -1,5 +1,5 @@
 import { useUserContext } from '@/context/AuthContext';
-import { useGetAllTransactions, useGetUserBudgets, useSearchTransactions } from '@/lib/react-query/queriesAndMutations';
+import { useGetUserBudgets, useSearchTransactions } from '@/lib/react-query/queriesAndMutations';
 import { Card } from '@/components/ui/card';
 import RecordsTable from '@/components/shared/RecordsTable';
 import BudgetsTable from '@/components/shared/BudgetsTable';

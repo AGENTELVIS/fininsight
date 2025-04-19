@@ -1,4 +1,4 @@
-import { INewAccount, INewBudget, INewData, INewUser, IUpdateUser, IBudget, ITransaction, TransactionsResponse } from '@/types';
+import { INewAccount, INewBudget, INewData, INewUser, IUpdateUser, IBudget, TransactionsResponse } from '@/types';
 import { 
     createAccount, 
     createBudget, 
@@ -28,10 +28,7 @@ import {
     useMutation, 
     useQueryClient,  
 } from '@tanstack/react-query';
-
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Query_Keys } from './queryKeys';
-
 
 export const useCreateUserAccount = () =>{
     return useMutation({

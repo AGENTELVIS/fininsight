@@ -6,7 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import BudgetModal from "@/components/shared/BudgetCard";
 import { useUserContext } from "@/context/AuthContext";
 import { useGetUserBudgets } from "@/lib/react-query/queriesAndMutations";
-import { getTotalSpentForCategory } from "@/lib/appwrite/api";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -19,12 +18,6 @@ import {
   HeartPulse, 
   GraduationCap, 
   CreditCard, 
-  Gift, 
-  Briefcase, 
-  TrendingUp, 
-  Wallet, 
-  RefreshCw, 
-  Building2 
 } from "lucide-react";
 
 type BudgetWithSpending = Models.Document & {

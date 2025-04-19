@@ -4,8 +4,6 @@ import {
     MenubarItem,
     MenubarMenu,
     MenubarSeparator,
-    MenubarShortcut,
-    MenubarSubTrigger,
     MenubarTrigger,
   } from "@/components/ui/menubar"  
 import { Ellipsis } from "lucide-react"
@@ -34,7 +32,7 @@ const EditDeleteMenu = ({account}: EditDeleteMenuProps) => {
                 </MenubarItem>
                 <MenubarSeparator />
                 <MenubarTrigger className="text-destructive">
-                  <DeleteDialog accountId={account.$id} onDelete={(id) => {
+                  <DeleteDialog accountId={account.$id} onDelete={() => {
                     setIsOpen(false);
                   }}/>
                 </MenubarTrigger>

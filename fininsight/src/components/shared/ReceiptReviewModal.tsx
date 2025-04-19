@@ -17,12 +17,6 @@ import {
   HeartPulse, 
   GraduationCap, 
   CreditCard, 
-  Gift, 
-  Briefcase, 
-  TrendingUp, 
-  Wallet, 
-  RefreshCw, 
-  Building2 
 } from "lucide-react";
 
 type ReceiptReviewModalProps = {

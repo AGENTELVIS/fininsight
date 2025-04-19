@@ -1,17 +1,17 @@
-import { useEffect } from 'react';
+
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { useSignOutAccount } from '@/lib/react-query/queriesAndMutations.ts';
 import { useUserContext, INITIAL_USER  } from '@/context/AuthContext.tsx';
 import { sidebarLinks } from '@/constants/index.ts';
 import { INavLink } from '@/types';
-import { Home, Wallet, ListChecks, FileText, LogOutIcon, LogOut } from 'lucide-react';
+import { Home, ListChecks, FileText, LogOut } from 'lucide-react';
 
 const LeftSidebar = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user, setUser, setIsAuthenticated, isLoading } = useUserContext();
-  const { mutate: signOut, isSuccess } = useSignOutAccount();
+  const { user, setUser, setIsAuthenticated } = useUserContext();
+  const { mutate: signOut } = useSignOutAccount();
 
   const handleSignOut = async (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>

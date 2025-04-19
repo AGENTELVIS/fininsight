@@ -1,4 +1,4 @@
-import React from 'react';
+
 import FinancialOverview from '@/components/shared/FinancialOverview';
 
 const Graphs = () => {

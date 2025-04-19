@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useUserContext } from "@/context/AuthContext";
 import { useSearchTransactions } from "@/lib/react-query/queriesAndMutations";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus } from "lucide-react";
 import CardForm from "@/components/forms/CardForm";
 import TransactionInfo from "@/components/shared/TransactionInfo";
-import ReceiptDropzone from "@/components/shared/ReceiptDropzone";
+
 
 const CreateTransactions = () => {
   const { user } = useUserContext();

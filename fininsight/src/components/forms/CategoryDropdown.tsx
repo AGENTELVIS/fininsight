@@ -45,57 +45,6 @@ type Status = {
   icon: React.ReactNode;
 };
 
-const getCategoryIcon = (category: string, type: string) => {
-  const iconSize = "h-4 w-4";
-  const iconClass = "text-gray-500";
-
-  if (type === "income") {
-    switch (category) {
-      case "salary":
-        return <Wallet className={`${iconSize} ${iconClass}`} />;
-      case "freelance":
-        return <Briefcase className={`${iconSize} ${iconClass}`} />;
-      case "investment":
-        return <TrendingUp className={`${iconSize} ${iconClass}`} />;
-      case "gift":
-        return <Gift className={`${iconSize} ${iconClass}`} />;
-      case "refund":
-        return <RefreshCw className={`${iconSize} ${iconClass}`} />;
-      case "bonus":
-        return <Wallet className={`${iconSize} ${iconClass}`} />;
-      case "rental_income":
-        return <Building2 className={`${iconSize} ${iconClass}`} />;
-      default:
-        return <Wallet className={`${iconSize} ${iconClass}`} />;
-    }
-  } else {
-    switch (category) {
-      case "shopping":
-        return <ShoppingBag className={`${iconSize} ${iconClass}`} />;
-      case "food":
-        return <Utensils className={`${iconSize} ${iconClass}`} />;
-      case "home":
-        return <Home className={`${iconSize} ${iconClass}`} />;
-      case "entertainment":
-        return <Film className={`${iconSize} ${iconClass}`} />;
-      case "bills":
-        return <Receipt className={`${iconSize} ${iconClass}`} />;
-      case "travel":
-        return <Plane className={`${iconSize} ${iconClass}`} />;
-      case "health":
-        return <HeartPulse className={`${iconSize} ${iconClass}`} />;
-      case "education":
-        return <GraduationCap className={`${iconSize} ${iconClass}`} />;
-      case "subscriptions":
-        return <CreditCard className={`${iconSize} ${iconClass}`} />;
-      case "other":
-        return <Receipt className={`${iconSize} ${iconClass}`} />;
-      default:
-        return <Receipt className={`${iconSize} ${iconClass}`} />;
-    }
-  }
-};
-
 const incomeCategories: Status[] = [
   { value: "salary", label: "Salary", icon: <Wallet className="h-4 w-4 text-gray-500" /> },
   { value: "freelance", label: "Freelance", icon: <Briefcase className="h-4 w-4 text-gray-500" /> },

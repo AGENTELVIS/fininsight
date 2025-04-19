@@ -1,9 +1,9 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGetUserTransactions, useGetUserAccounts, useGetUserBudgets } from '@/lib/react-query/queriesAndMutations';
 import { useUserContext } from '@/context/AuthContext';
 import { Card } from '@/components/ui/card';
-import { Loader2, ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { subMonths } from 'date-fns';
 
 interface CachedData {
@@ -139,7 +139,7 @@ const SmartInsight = () => {
 
             1. **One-Liner Insight (label it as \`OneLiner:\`)**  
             → A short, emoji-friendly takeaway in one sentence.  
-            → Format: 💡 You’ve spent 450 more on Food this month compared to your usual spending.
+            → Format: 💡 You’ve spent ₹450 more on Food this month compared to your usual spending.
 
             ---
 

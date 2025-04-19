@@ -7,8 +7,6 @@ import { Card } from '@/components/ui/card';
 import { ExtractedData } from '@/types';
 import ReceiptScanner from './RecieptScanner';
 import ReceiptReviewModal from './ReceiptReviewModal';
-import { appwriteConfig, storage } from '@/lib/appwrite/config';
-import { ID } from 'appwrite';
 import { uploadFile } from "@/lib/appwrite/api";
 
 const ReceiptDropzone: React.FC = () => {

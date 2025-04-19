@@ -1,18 +1,16 @@
-import React, { useState } from "react";
-import { useGetUserTransactions, useDeleteTransaction } from "@/lib/react-query/queriesAndMutations";
+import { useState } from "react";
+import { useDeleteTransaction } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Models } from "appwrite";
-import { Trash, Edit, ChevronLeft, ChevronRight, FileDown, FileText } from "lucide-react";
+import { Trash, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CardForm from "@/components/forms/CardForm";
 import { useQueryClient } from "@tanstack/react-query";
 import { Query_Keys } from "@/lib/react-query/queryKeys";
 import { format } from 'date-fns';
 import { formatCurrency } from '@/lib/utils';
-import { jsPDF } from 'jspdf';
-import autoTable from "jspdf-autotable";
 import { 
   ShoppingBag, 
   Utensils, 
@@ -89,7 +87,6 @@ const getCategoryIcon = (category: string, type: string) => {
 };
 
 const RecordsTable = ({ transactions }: RecordsTableProps) => {
-  const { user } = useUserContext();
   const { mutateAsync: deleteTransaction } = useDeleteTransaction();
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);

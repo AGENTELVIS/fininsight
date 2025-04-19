@@ -1,10 +1,8 @@
-import { ID, Query, Models } from "appwrite";
+import { ID, Query } from "appwrite";
 import { INewUser, INewData, INewAccount, INewBudget, IUpdateUser, IBudget, ITransaction, TransactionsResponse } from "../../types/index.ts";
 import { addDays, addWeeks, addMonths, addYears } from "date-fns";
 import { account, appwriteConfig, storage} from "./config.js";
 import {  avatars , databases } from "./config.js";
-
-
 
 export async function createUserAccount(user: INewUser) {
   try {
