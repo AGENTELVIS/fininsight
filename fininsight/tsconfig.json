@@ -9,11 +9,23 @@
     }
   ],
   "compilerOptions": {
-    "baseUrl": ".",
+    "target": "ES2020",                         // ✅ Required for private identifiers
+    "module": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
+    "jsx": "react-jsx",                         // ✅ Required for .tsx support
+    "esModuleInterop": true,                    // ✅ Fixes default import issues
+    "allowSyntheticDefaultImports": true,       // ✅ Works with packages like react-hook-form
+    "moduleResolution": "Node",                 // ✅ Compatible with most setups
+    "baseUrl": ".",                             // ✅ For path aliases like @/
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "skipLibCheck": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "src/types"], // ✅ Include 'function' folder
+  "include": ["src", "src/types"],
   "exclude": ["node_modules", "dist"]
 }
