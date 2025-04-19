@@ -35,9 +35,9 @@ const CashFlow = ({ range }: CashFlowProps) => {
   }, [user?.id, range]);
 
   return (
-    <Card className="p-6">
+    <div className="pt-6 pl-2 pr-2 pb-6 border rounded-xl">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Cash Flow</h2>
+        <h2 className="text-xl font-semibold pl-3">Cash Flow</h2>
       </div>
 
       {loading ? (
@@ -68,7 +68,7 @@ const CashFlow = ({ range }: CashFlowProps) => {
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 };
 

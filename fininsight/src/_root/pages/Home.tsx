@@ -19,7 +19,7 @@ const Home = () => {
         <CardForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       </div>
   
-      <div className="bg-white rounded-2xl shadow-md p-4 mb-6">
+      <div className="mb-5">
         <Graphs />
       </div>
 

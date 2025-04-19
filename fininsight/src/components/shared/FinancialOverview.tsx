@@ -45,47 +45,49 @@ const FinancialOverview = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Financial Overview</h2>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <span>View by:</span>
-          {(['week', 'month', 'year'] as TimeRange[]).map((r) => (
-            <button
-              key={r}
-              onClick={() => setRange(r)}
-              className={`px-2 py-1 rounded-md transition-colors ${
-                range === r ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {r.charAt(0).toUpperCase() + r.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <CashFlow range={range} />
-        
-        <Card className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 
-              className="text-xl font-semibold cursor-pointer hover:text-blue-600 transition-colors"
-              onClick={() => setShowIncome(!showIncome)}
-            >
-              {showIncome ? 'Income Categories' : 'Expense Categories'}
-            </h2>
+      <Card className='p-4 pb-5'>
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold pl-3 mb-5 mt-3">Financial Overview</h2>
+          <div className="flex items-center gap-2 text-sm text-gray-500 mb-5 mt-3 mr-2">
+            <span>View by:</span>
+            {(['week', 'month', 'year'] as TimeRange[]).map((r) => (
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={`px-2 py-1 rounded-md transition-colors ${
+                  range === r ? 'text-blue-600 font-medium' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+              </button>
+            ))}
           </div>
-          <CategoryPieChart 
-            range={range} 
-            type={showIncome ? 'income' : 'expense'} 
-          />
-        </Card>
-      </div>
+        </div>
 
-      <Card className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Transaction Overview</h2>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CashFlow range={range} />
+          
+          <div className="pt-6 border rounded-xl">
+            <div className="flex justify-between items-center ">
+              <h2 
+                className="text-xl pl-5 font-semibold cursor-pointer hover:text-blue-600 transition-colors"
+                onClick={() => setShowIncome(!showIncome)}
+              >
+                {showIncome ? 'Income Categories' : 'Expense Categories'}
+              </h2>
+            </div>
+            <CategoryPieChart 
+              range={range} 
+              type={showIncome ? 'income' : 'expense'} 
+            />
+          </div>
+        </div>
+      </Card>
+
+      <Card className='pt-6 pb-6'>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold pl-5">Transaction Overview</h2>
+          <div className="flex items-center gap-2 text-sm text-gray-500 mr-4">
             <span>View by:</span>
             {['daily', 'monthly'].map((v) => (
               <button
