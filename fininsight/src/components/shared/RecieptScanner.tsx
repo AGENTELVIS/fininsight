@@ -9,7 +9,7 @@ type ReceiptScannerProps = {
 };
 
 const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onExtract, file }) => {
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const { toast } = useToast();
 
   const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
